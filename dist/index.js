@@ -46430,9 +46430,6 @@ function requireSrc () {
 
 	async function run() {
 	  try {
-	    const authResponse = await axiosInstance.get(`${piholeUrl}/auth`);
-	    console.log(authResponse.data);
-
 	    const sid = await authenticateWithPihole();
 	    const existingLists = await fetchListsFromPihole(sid);
 	    await deleteExistingLists(sid, existingLists);
@@ -46443,7 +46440,6 @@ function requireSrc () {
 
 	    core.info("✅ Pi-hole blocklist sync completed successfully");
 	  } catch (error) {
-	    // Log the error and fail the action
 	    core.error("Error occurred:", error.message);
 	    core.setFailed(`Action failed with error: ${error.message}`);
 	  }
