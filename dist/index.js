@@ -3,7 +3,7 @@ import require$$0$2 from 'crypto';
 import require$$1 from 'fs';
 import require$$1$4 from 'path';
 import require$$2 from 'http';
-import require$$3 from 'https';
+import require$$2$1 from 'https';
 import require$$0$5 from 'net';
 import require$$1$1 from 'tls';
 import require$$4 from 'events';
@@ -17,15 +17,15 @@ import require$$0$8 from 'node:stream';
 import require$$1$2 from 'node:util';
 import require$$0$7 from 'node:events';
 import require$$0$9 from 'worker_threads';
-import require$$2$1 from 'perf_hooks';
+import require$$2$2 from 'perf_hooks';
 import require$$5 from 'util/types';
 import require$$4$1 from 'async_hooks';
 import require$$1$3 from 'console';
 import require$$0$a from 'url';
-import require$$3$1 from 'zlib';
+import require$$3 from 'zlib';
 import require$$6 from 'string_decoder';
 import require$$0$b from 'diagnostics_channel';
-import require$$2$2 from 'child_process';
+import require$$2$3 from 'child_process';
 import require$$6$1 from 'timers';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -380,7 +380,7 @@ function requireTunnel$1 () {
 	hasRequiredTunnel$1 = 1;
 	var tls = require$$1$1;
 	var http = require$$2;
-	var https = require$$3;
+	var https = require$$2$1;
 	var events = require$$4;
 	var util = require$$0$3;
 
@@ -3567,7 +3567,7 @@ function requireUtil$5 () {
 
 	const { redirectStatusSet, referrerPolicySet: referrerPolicyTokens, badPortsSet } = requireConstants$3();
 	const { getGlobalOrigin } = requireGlobal$1();
-	const { performance } = require$$2$1;
+	const { performance } = require$$2$2;
 	const { isBlobLike, toUSVString, ReadableStreamFrom } = requireUtil$6();
 	const assert = require$$0$4;
 	const { isUint8Array } = require$$5;
@@ -17099,7 +17099,7 @@ function requireFetch () {
 	} = requireResponse();
 	const { Headers } = requireHeaders();
 	const { Request, makeRequest } = requireRequest();
-	const zlib = require$$3$1;
+	const zlib = require$$3;
 	const {
 	  bytesMatch,
 	  makePolicyContainer,
@@ -24394,7 +24394,7 @@ function requireLib () {
 	Object.defineProperty(lib, "__esModule", { value: true });
 	lib.HttpClient = lib.isHttps = lib.HttpClientResponse = lib.HttpClientError = lib.getProxyUrl = lib.MediaTypes = lib.Headers = lib.HttpCodes = void 0;
 	const http = __importStar(require$$2);
-	const https = __importStar(require$$3);
+	const https = __importStar(require$$2$1);
 	const pm = __importStar(requireProxy());
 	const tunnel = __importStar(requireTunnel());
 	const undici_1 = requireUndici();
@@ -26096,7 +26096,7 @@ function requireToolrunner () {
 	toolrunner.argStringToArray = toolrunner.ToolRunner = void 0;
 	const os = __importStar(require$$0$1);
 	const events = __importStar(require$$4);
-	const child = __importStar(require$$2$2);
+	const child = __importStar(require$$2$3);
 	const path = __importStar(require$$1$4);
 	const io = __importStar(requireIo());
 	const ioUtil = __importStar(requireIoUtil());
@@ -40072,7 +40072,7 @@ function requireForm_data () {
 	var util = require$$0$3;
 	var path = require$$1$4;
 	var http = require$$2;
-	var https = require$$3;
+	var https = require$$2$1;
 	var parseUrl = require$$0$a.parse;
 	var fs = require$$1;
 	var Stream = require$$0$6.Stream;
@@ -40714,7 +40714,7 @@ function requireFollowRedirects () {
 	var url = require$$0$a;
 	var URL = url.URL;
 	var http = require$$2;
-	var https = require$$3;
+	var https = require$$2$1;
 	var Writable = require$$0$6.Writable;
 	var assert = require$$0$4;
 	var debug = requireDebug();
@@ -41414,10 +41414,10 @@ function requireAxios () {
 	const url = require$$0$a;
 	const proxyFromEnv = requireProxyFromEnv();
 	const http = require$$2;
-	const https = require$$3;
+	const https = require$$2$1;
 	const util = require$$0$3;
 	const followRedirects = requireFollowRedirects();
-	const zlib = require$$3$1;
+	const zlib = require$$3;
 	const stream = require$$0$6;
 	const events = require$$4;
 
@@ -46404,6 +46404,7 @@ function requireSrc () {
 	hasRequiredSrc = 1;
 	const core = requireCore();
 	const axios = /*@__PURE__*/ requireAxios();
+	const https = require$$2$1;
 
 	async function run() {
 	  try {
@@ -46414,13 +46415,22 @@ function requireSrc () {
 	      required: true,
 	    });
 	    const blocklistFile = core.getInput("blocklist-file", { required: true });
+	    const allowSelfSigned = core.getInput("allow-self-signed") === "true";
 
 	    core.info(`Pi-hole URL: ${piholeUrl}`);
 	    core.info(`Blocklist File: ${blocklistFile}`);
+	    core.info(`Allow Self-Signed Certificates: ${allowSelfSigned}`);
+
+	    const axiosInstance = axios.create({
+	      httpsAgent: new https.Agent({
+	        rejectUnauthorized: !allowSelfSigned,
+	      }),
+	      timeout: 30000,
+	    });
 
 	    core.info(`Authenticating with Pi-hole...`);
 
-	    const authResponse = await axios.post(`${piholeUrl}/auth`, {
+	    const authResponse = await axiosInstance.post(`${piholeUrl}/auth`, {
 	      password: piholePassword,
 	    });
 	    if (authResponse.status !== 200) {
@@ -46435,11 +46445,14 @@ function requireSrc () {
 
 	    core.info(`Fetching blocklists via API`);
 
-	    const blocklistResponse = await axios.get(`${piholeUrl}/admin/lists`, {
-	      headers: {
-	        sid: sid,
-	      },
-	    });
+	    const blocklistResponse = await axiosInstance.get(
+	      `${piholeUrl}/admin/lists`,
+	      {
+	        headers: {
+	          sid: sid,
+	        },
+	      }
+	    );
 
 	    if (blocklistResponse.status !== 200) {
 	      throw new Error(
@@ -46455,7 +46468,6 @@ function requireSrc () {
 	    });
 
 	    core.info("");
-	    
 	  } catch (error) {
 	    // Log the error and fail the action
 	    core.error("Error occurred:", error.message);

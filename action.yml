@@ -10,6 +10,10 @@ inputs:
   pihole-app-password:
     description: "The app/api password for the Pi-hole instance"
     required: true
+  allow-self-signed-certs:
+    description: "Allow self-signed SSL certificates (true/false)"
+    required: false
+    default: false
 
   blocklist-file:
     description: "The file of blocklists to sync"

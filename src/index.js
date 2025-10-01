@@ -1,5 +1,6 @@
 const core = require("@actions/core");
 const axios = require("axios");
+const https = require("https");
 
 async function run() {
   try {
@@ -10,13 +11,22 @@ async function run() {
       required: true,
     });
     const blocklistFile = core.getInput("blocklist-file", { required: true });
+    const allowSelfSigned = core.getInput("allow-self-signed") === "true";
 
     core.info(`Pi-hole URL: ${piholeUrl}`);
     core.info(`Blocklist File: ${blocklistFile}`);
+    core.info(`Allow Self-Signed Certificates: ${allowSelfSigned}`);
+
+    const axiosInstance = axios.create({
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: !allowSelfSigned,
+      }),
+      timeout: 30000,
+    });
 
     core.info(`Authenticating with Pi-hole...`);
 
-    const authResponse = await axios.post(`${piholeUrl}/auth`, {
+    const authResponse = await axiosInstance.post(`${piholeUrl}/auth`, {
       password: piholePassword,
     });
     if (authResponse.status !== 200) {
@@ -31,11 +41,14 @@ async function run() {
 
     core.info(`Fetching blocklists via API`);
 
-    const blocklistResponse = await axios.get(`${piholeUrl}/admin/lists`, {
-      headers: {
-        sid: sid,
-      },
-    });
+    const blocklistResponse = await axiosInstance.get(
+      `${piholeUrl}/admin/lists`,
+      {
+        headers: {
+          sid: sid,
+        },
+      }
+    );
 
     if (blocklistResponse.status !== 200) {
       throw new Error(
@@ -51,7 +64,6 @@ async function run() {
     });
 
     core.info("");
-    
   } catch (error) {
     // Log the error and fail the action
     core.error("Error occurred:", error.message);
