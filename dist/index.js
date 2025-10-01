@@ -46438,7 +46438,8 @@ function requireSrc () {
 	        `Authentication failed with status: ${authResponse.status} - ${authResponse.statusText}`
 	      );
 	    }
-	    const { sid } = authResponse.data;
+	    const { session } = authResponse.data;
+	    const sid = session.sid;
 	    core.info(`✅ Authentication successful`);
 	    core.info("");
 
