@@ -46456,11 +46456,13 @@ function requireSrc () {
 	    );
 	  }
 	  const { session } = authResponse.data;
-	  core.info(
-	    `Authentication successful - valid for ${session.validity} seconds`
-	  );
+	  const sid = session.sid;
+	  core.setSecret(sid);
+
+	  core.info(`Authentication successful, valid for ${session.validity} seconds`);
 	  core.info("");
-	  return session.sid;
+
+	  return sid;
 	}
 
 	async function fetchListsFromPihole(sid) {
@@ -46497,11 +46499,11 @@ function requireSrc () {
 
 	  const deleteResponse = await axiosInstance.post(
 	    `${piholeUrl}/lists:batchDelete`,
+	    requestBody,
 	    {
 	      headers: {
 	        sid: sid,
 	      },
-	      data: requestBody,
 	    }
 	  );
 	  if (deleteResponse.status !== 200) {
