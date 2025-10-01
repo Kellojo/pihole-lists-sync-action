@@ -1,0 +1,30 @@
+{
+  "name": "pihole-lists-sync-action",
+  "version": "1.0.0",
+  "description": "A simple GitHub Action that prints \"Hello World\" to the console during its run.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\"",
+    "build": "rollup --config rollup.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kellojo/pihole-lists-sync-action.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Kellojo/pihole-lists-sync-action/issues"
+  },
+  "homepage": "https://github.com/Kellojo/pihole-lists-sync-action#readme",
+  "dependencies": {
+    "@actions/core": "^1.11.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "rollup": "^4.52.3"
+  }
+}

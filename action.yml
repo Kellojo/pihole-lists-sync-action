@@ -1,0 +1,25 @@
+name: "Pi Hole Lists Sync Action"
+description: "A simple GitHub action that syncs Pi-hole blocklists from a specified source to a Pi-hole instance via API."
+author: "Your Name"
+
+inputs:
+  pihole-url:
+    description: "The URL of the Pi-hole instance (e.g., http://pi.hole/api)"
+    required: true
+    default: "http://pi.hole/api"
+  pihole-app-password:
+    description: "The app/api password for the Pi-hole instance"
+    required: true
+
+  blocklist-file:
+    description: "The file of blocklists to sync"
+    required: true
+    default: "blocklists.txt"
+
+outputs:
+  greeting:
+    description: "The greeting message that was printed"
+
+runs:
+  using: "node20"
+  main: "dist/index.js"
