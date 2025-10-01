@@ -46486,7 +46486,7 @@ function requireSrc () {
 	async function deleteExistingLists(sid, lists) {
 	  core.info(`Deleting existing lists`);
 
-	  await axiosInstance.delete(`${piholeUrl}/lists:batchDelete`, {
+	  await axiosInstance.post(`${piholeUrl}/lists:batchDelete`, {
 	    headers: {
 	      sid: sid,
 	    },
