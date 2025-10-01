@@ -11,7 +11,7 @@ async function run() {
       required: true,
     });
     const blocklistFile = core.getInput("blocklist-file", { required: true });
-    const allowSelfSigned = core.getInput("allow-self-signed") === "true";
+    const allowSelfSigned = core.getInput("allow-self-signed-certs") === "true";
 
     core.info(`Pi-hole URL: ${piholeUrl}`);
     core.info(`Blocklist File: ${blocklistFile}`);
