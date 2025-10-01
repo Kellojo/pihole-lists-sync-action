@@ -46524,6 +46524,7 @@ function requireSrc () {
 	    .filter((line) => line && !line.startsWith("#"));
 
 	  core.info(`Found ${blocklistUrls.length} URLs in blocklist file`);
+	  core.info("");
 	  return blocklistUrls;
 	}
 
