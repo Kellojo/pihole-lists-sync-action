@@ -46456,10 +46456,11 @@ function requireSrc () {
 	    );
 	  }
 	  const { session } = authResponse.data;
-	  const sid = session.sid;
-	  core.info(`Authentication successful`);
+	  core.info(
+	    `Authentication successful - valid for ${session.validity} seconds`
+	  );
 	  core.info("");
-	  return sid;
+	  return session.sid;
 	}
 
 	async function fetchListsFromPihole(sid) {
