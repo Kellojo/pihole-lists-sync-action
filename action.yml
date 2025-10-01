@@ -1,4 +1,4 @@
-name: "Pi Hole Lists Sync Action"
+name: "Pi-hole Lists Sync Action"
 description: "A simple GitHub action that syncs Pi-hole blocklists from a specified source to a Pi-hole instance via API."
 author: "Your Name"
 
