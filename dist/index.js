@@ -46457,9 +46457,10 @@ function requireSrc () {
 	    );
 	  }
 	  const { session } = authResponse.data;
-	  session.sid;
+	  const sid = session.sid;
 	  core.info(`Authentication successful`);
 	  core.info("");
+	  return sid;
 	}
 
 	async function fetchListsFromPihole(sid) {

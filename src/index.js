@@ -56,6 +56,7 @@ async function authenticateWithPihole() {
   const sid = session.sid;
   core.info(`Authentication successful`);
   core.info("");
+  return sid;
 }
 
 async function fetchListsFromPihole(sid) {
