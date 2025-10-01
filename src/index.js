@@ -13,9 +13,10 @@ async function run() {
     const blocklistFile = core.getInput("blocklist-file", { required: true });
     const allowSelfSigned = core.getInput("allow-self-signed-certs") === "true";
 
-    core.info(`Pi-hole URL: ${piholeUrl}`);
-    core.info(`Blocklist File: ${blocklistFile}`);
-    core.info(`Allow Self-Signed Certificates: ${allowSelfSigned}`);
+    core.info(`🌐 Pi-hole URL: ${piholeUrl}`);
+    core.info(`📁 Blocklist File: ${blocklistFile}`);
+    core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
+    core.info("");
 
     const axiosInstance = axios.create({
       httpsAgent: new https.Agent({
@@ -24,8 +25,7 @@ async function run() {
       timeout: 30000,
     });
 
-    core.info(`Authenticating with Pi-hole...`);
-
+    core.info(`🔐 Authenticating with Pi-hole`);
     const authResponse = await axiosInstance.post(`${piholeUrl}/auth`, {
       password: piholePassword,
     });
@@ -34,21 +34,16 @@ async function run() {
         `Authentication failed with status: ${authResponse.status} - ${authResponse.statusText}`
       );
     }
-
     const { sid } = authResponse.data;
-    core.info(`Authentication successful`);
+    core.info(`✅ Authentication successful`);
     core.info("");
 
     core.info(`Fetching blocklists via API`);
-
-    const blocklistResponse = await axiosInstance.get(
-      `${piholeUrl}/admin/lists`,
-      {
-        headers: {
-          sid: sid,
-        },
-      }
-    );
+    const blocklistResponse = await axiosInstance.get(`${piholeUrl}/lists`, {
+      headers: {
+        sid: sid,
+      },
+    });
 
     if (blocklistResponse.status !== 200) {
       throw new Error(
@@ -56,8 +51,8 @@ async function run() {
       );
     }
 
-    const { lists } = await blocklistResponse.json();
-    core.info(`Fetched ${lists.length} blocklists from Pi-hole`);
+    const { lists } = await blocklistResponse.data;
+    core.info(`✅ Fetched ${lists.length} blocklists from Pi-hole`);
 
     lists.forEach((list) => {
       core.info(`- ${list.address}`);
