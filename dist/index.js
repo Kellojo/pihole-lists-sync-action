@@ -27271,7 +27271,7 @@ function requireSrc () {
 	    core.info(`Blocklist File: ${blocklistFile}`);
 
 	    core.info(`Authenticating with Pi-hole...`);
-	    const response = await fetch(`${piholeUrl}/`, {
+	    const response = await fetch(`${piholeUrl}/auth`, {
 	      method: "POST",
 	      headers: {
 	        "Content-Type": "application/json",
