@@ -46440,6 +46440,7 @@ function requireSrc () {
 	    }
 	    const { session } = authResponse.data;
 	    const sid = session.sid;
+	    console.log(sesision);
 	    core.info(`✅ Authentication successful`);
 	    core.info("");
 
