@@ -46405,70 +46405,137 @@ function requireSrc () {
 	const core = requireCore();
 	const axios = /*@__PURE__*/ requireAxios();
 	const https = require$$2$1;
+	const fs = require$$1;
+
+	core.info("Starting Pi-hole blocklist sync...");
+
+	const piholeUrl = core.getInput("pihole-url", { required: true });
+	const piholePassword = core.getInput("pihole-app-password", {
+	  required: true,
+	});
+	const blocklistFile = core.getInput("blocklist-file", { required: true });
+	const allowSelfSigned = core.getInput("allow-self-signed-certs") === "true";
+
+	core.info(`🌐 Pi-hole URL: ${piholeUrl}`);
+	core.info(`📁 Blocklist File: ${blocklistFile}`);
+	core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
+	core.info("");
+
+	const axiosInstance = axios.create({
+	  httpsAgent: new https.Agent({
+	    rejectUnauthorized: !allowSelfSigned,
+	  }),
+	  timeout: 30000,
+	});
 
 	async function run() {
 	  try {
-	    core.info("Starting Pi-hole blocklist sync...");
+	    const sid = await authenticateWithPihole();
+	    const existingLists = await fetchListsFromPihole(sid);
+	    await deleteExistingLists(sid, existingLists);
 
-	    const piholeUrl = core.getInput("pihole-url", { required: true });
-	    const piholePassword = core.getInput("pihole-app-password", {
-	      required: true,
-	    });
-	    const blocklistFile = core.getInput("blocklist-file", { required: true });
-	    const allowSelfSigned = core.getInput("allow-self-signed-certs") === "true";
+	    const blocklistUrls = await getBlocklistUrlsFromConfig();
 
-	    core.info(`🌐 Pi-hole URL: ${piholeUrl}`);
-	    core.info(`📁 Blocklist File: ${blocklistFile}`);
-	    core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
-	    core.info("");
+	    await addBlocklists(sid, blocklistUrls);
 
-	    const axiosInstance = axios.create({
-	      httpsAgent: new https.Agent({
-	        rejectUnauthorized: !allowSelfSigned,
-	      }),
-	      timeout: 30000,
-	    });
-
-	    core.info(`🔐 Authenticating with Pi-hole`);
-	    const authResponse = await axiosInstance.post(`${piholeUrl}/auth`, {
-	      password: piholePassword,
-	    });
-	    if (authResponse.status !== 200) {
-	      throw new Error(
-	        `Authentication failed with status: ${authResponse.status} - ${authResponse.statusText}`
-	      );
-	    }
-	    const { session } = authResponse.data;
-	    const sid = session.sid;
-	    core.info(`✅ Authentication successful`);
-	    core.info("");
-
-	    core.info(`Fetching blocklists via API`);
-	    const blocklistResponse = await axiosInstance.get(`${piholeUrl}/lists`, {
-	      headers: {
-	        sid: sid,
-	      },
-	    });
-
-	    if (blocklistResponse.status !== 200) {
-	      throw new Error(
-	        `Failed to fetch blocklists with status: ${blocklistResponse.status} - ${blocklistResponse.statusText}`
-	      );
-	    }
-
-	    const { lists } = await blocklistResponse.data;
-	    core.info(`✅ Fetched ${lists.length} blocklists from Pi-hole`);
-
-	    lists.forEach((list) => {
-	      core.info(`- ${list.address}`);
-	    });
-
-	    core.info("");
+	    core.info("✅ Pi-hole blocklist sync completed successfully");
 	  } catch (error) {
 	    // Log the error and fail the action
 	    core.error("Error occurred:", error.message);
 	    core.setFailed(`Action failed with error: ${error.message}`);
 	  }
+	}
+
+	async function authenticateWithPihole() {
+	  core.info(`Authenticating with Pi-hole`);
+	  const authResponse = await axiosInstance.post(`${piholeUrl}/auth`, {
+	    password: piholePassword,
+	  });
+	  if (authResponse.status !== 200) {
+	    throw new Error(
+	      `Authentication failed with status: ${authResponse.status} - ${authResponse.statusText}`
+	    );
+	  }
+	  const { session } = authResponse.data;
+	  session.sid;
+	  core.info(`Authentication successful`);
+	  core.info("");
+	}
+
+	async function fetchListsFromPihole(sid) {
+	  core.info(`Fetching lists via API`);
+	  const blocklistResponse = await axiosInstance.get(`${piholeUrl}/lists`, {
+	    headers: {
+	      sid: sid,
+	    },
+	  });
+
+	  if (blocklistResponse.status !== 200) {
+	    throw new Error(
+	      `Failed to fetch lists with status: ${blocklistResponse.status} - ${blocklistResponse.statusText}`
+	    );
+	  }
+
+	  const { lists } = await blocklistResponse.data;
+	  core.info(`Found ${lists.length} lists configured in Pi-hole`);
+	  core.info("");
+
+	  return lists;
+	}
+
+	async function deleteExistingLists(sid, lists) {
+	  core.info(`Deleting existing lists`);
+
+	  for (const list of lists) {
+	    const url = list.address;
+
+	    core.info(`Removing ${url}`);
+	    await axiosInstance.delete(`${piholeUrl}/lists/${url}`, {
+	      headers: {
+	        sid: sid,
+	      },
+	    });
+	  }
+
+	  core.info(`All existing lists removed`);
+	  core.info("");
+	}
+
+	async function getBlocklistUrlsFromConfig() {
+	  core.info(`Reading blocklist URLs from file: ${blocklistFile}`);
+	  if (!fs.existsSync(blocklistFile)) {
+	    throw new Error(`Blocklist file not found: ${blocklistFile}`);
+	  }
+
+	  const blocklistUrls = fs
+	    .readFileSync(blocklistFile, "utf-8")
+	    .split("\n")
+	    .map((line) => line.trim())
+	    .filter((line) => line && !line.startsWith("#"));
+
+	  core.info(`Found ${blocklistUrls.length} URLs in blocklist file`);
+	  return blocklistUrls;
+	}
+
+	async function addBlocklists(sid, blocklistUrls) {
+	  core.info(`Adding ${blocklistUrls.length} blocklists to Pi-hole`);
+	  for (const url of blocklistUrls) {
+	    core.info(`Adding ${url}`);
+	    await axiosInstance.post(
+	      `${piholeUrl}/lists`,
+	      {
+	        address: url,
+	        type: "block",
+	      },
+	      {
+	        headers: {
+	          sid: sid,
+	        },
+	      }
+	    );
+	  }
+	  core.info(`All blocklists added`);
+	  core.info("");
 	}
 
 	run();
