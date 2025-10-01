@@ -46486,6 +46486,8 @@ function requireSrc () {
 	async function deleteExistingLists(sid, lists) {
 	  core.info(`Deleting existing lists`);
 
+	  console.log(lists);
+
 	  const deleteResponse = await axiosInstance.post(
 	    `${piholeUrl}/lists:batchDelete`,
 	    {
