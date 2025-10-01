@@ -1,4 +1,5 @@
 const core = require("@actions/core");
+const axios = require("axios");
 
 async function run() {
   try {
@@ -14,34 +15,29 @@ async function run() {
     core.info(`Blocklist File: ${blocklistFile}`);
 
     core.info(`Authenticating with Pi-hole...`);
-    const response = await fetch(`${piholeUrl}/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ password: piholePassword }),
-    });
 
-    if (!response.ok) {
+    const authResponse = await axios.post(`${piholeUrl}/auth`, {
+      password: piholePassword,
+    });
+    if (authResponse.status !== 200) {
       throw new Error(
-        `Authentication failed with status: ${response.status} - ${response.statusText}`
+        `Authentication failed with status: ${authResponse.status} - ${authResponse.statusText}`
       );
     }
 
-    const { sid } = await response.json();
+    const { sid } = authResponse.data;
     core.info(`Authentication successful`);
     core.info("");
 
     core.info(`Fetching blocklists via API`);
 
-    const blocklistResponse = await fetch(`${piholeUrl}/admin/lists`, {
-      method: "GET",
+    const blocklistResponse = await axios.get(`${piholeUrl}/admin/lists`, {
       headers: {
-        "Content-Type": "application/json",
         sid: sid,
       },
     });
-    if (!blocklistResponse.ok) {
+
+    if (blocklistResponse.status !== 200) {
       throw new Error(
         `Failed to fetch blocklists with status: ${blocklistResponse.status} - ${blocklistResponse.statusText}`
       );
@@ -55,6 +51,7 @@ async function run() {
     });
 
     core.info("");
+    
   } catch (error) {
     // Log the error and fail the action
     core.error("Error occurred:", error.message);
