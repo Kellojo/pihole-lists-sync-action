@@ -90,7 +90,12 @@ async function deleteExistingLists(sid, lists) {
       headers: {
         sid: sid,
       },
-      data: lists,
+      data: lists.map((list) => {
+        return {
+          item: list.address,
+          type: list.type,
+        };
+      }),
     }
   );
   if (deleteResponse.status !== 200) {
