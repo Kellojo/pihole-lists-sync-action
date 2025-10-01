@@ -34,6 +34,8 @@ async function run() {
 
     await addBlocklists(blocklistUrls);
 
+    await updateGravity();
+
     core.info("✅ Pi-hole blocklist sync completed successfully");
   } catch (error) {
     core.error("Error occurred:", error.message);
@@ -135,6 +137,18 @@ async function addBlocklists(blocklistUrls) {
   }
   core.info(`All blocklists added`);
   core.info("");
+}
+
+async function updateGravity() {
+  core.info(`🔄 Updating Pi-hole gravity`);
+  const gravityResponse = await axiosInstance.post(
+    `${piholeUrl}/action/gravity`
+  );
+  if (gravityResponse.status !== 200) {
+    throw new Error(
+      `Failed to update gravity with status: ${gravityResponse.status} - ${gravityResponse.statusText}`
+    );
+  }
 }
 
 async function logoutFromPihole() {
