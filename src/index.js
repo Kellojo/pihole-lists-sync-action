@@ -17,22 +17,22 @@ core.info(`📁 Blocklist File: ${blocklistFile}`);
 core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
 core.info("");
 
-const axiosInstance = axios.create({
-  httpsAgent: new https.Agent({
-    rejectUnauthorized: !allowSelfSigned,
-  }),
-  timeout: 30000,
-});
-
 async function run() {
   try {
-    const sid = await authenticateWithPihole();
-    const existingLists = await fetchListsFromPihole(sid);
-    await deleteExistingLists(sid, existingLists);
+    const axiosInstance = axios.create({
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: !allowSelfSigned,
+      }),
+      timeout: 30000,
+    });
+
+    const sid = await authenticateWithPihole(axiosInstance);
+    const existingLists = await fetchListsFromPihole(axiosInstance, sid);
+    await deleteExistingLists(axiosInstance, sid, existingLists);
 
     const blocklistUrls = await getBlocklistUrlsFromConfig();
 
-    await addBlocklists(sid, blocklistUrls);
+    await addBlocklists(axiosInstance, sid, blocklistUrls);
 
     core.info("✅ Pi-hole blocklist sync completed successfully");
   } catch (error) {
@@ -42,7 +42,7 @@ async function run() {
   }
 }
 
-async function authenticateWithPihole() {
+async function authenticateWithPihole(axiosInstance) {
   core.info(`Authenticating with Pi-hole`);
   const authResponse = await axiosInstance.post(`${piholeUrl}/auth`, {
     password: piholePassword,
@@ -58,7 +58,7 @@ async function authenticateWithPihole() {
   core.info("");
 }
 
-async function fetchListsFromPihole(sid) {
+async function fetchListsFromPihole(axiosInstance, sid) {
   core.info(`Fetching lists via API`);
   const blocklistResponse = await axiosInstance.get(`${piholeUrl}/lists`, {
     headers: {
@@ -79,7 +79,7 @@ async function fetchListsFromPihole(sid) {
   return lists;
 }
 
-async function deleteExistingLists(sid, lists) {
+async function deleteExistingLists(axiosInstance, sid, lists) {
   core.info(`Deleting existing lists`);
 
   for (const list of lists) {
@@ -113,7 +113,7 @@ async function getBlocklistUrlsFromConfig() {
   return blocklistUrls;
 }
 
-async function addBlocklists(sid, blocklistUrls) {
+async function addBlocklists(axiosInstance, sid, blocklistUrls) {
   core.info(`Adding ${blocklistUrls.length} blocklists to Pi-hole`);
   for (const url of blocklistUrls) {
     core.info(`Adding ${url}`);
