@@ -99,7 +99,7 @@ async function deleteExistingLists(lists) {
   );
   if (![200, 204].includes(deleteResponse.status)) {
     core.error(`Failed to delete existing lists`);
-    console.info(JSON.stringify(deleteResponse.data, null, 2));
+    
     throw new Error(
       `Failed to delete lists with status: ${deleteResponse.status} - ${deleteResponse.statusText}`
     );
