@@ -44,7 +44,7 @@ async function run() {
 }
 
 async function authenticateWithPihole() {
-  core.info(`Authenticating with Pi-hole`);
+  core.info(`🔑 Authenticating with Pi-hole`);
   const authResponse = await axiosInstance.post(`${piholeUrl}/auth`, {
     password: piholePassword,
   });
@@ -64,7 +64,7 @@ async function authenticateWithPihole() {
 }
 
 async function fetchListsFromPihole() {
-  core.info(`Fetching lists via API`);
+  core.info(`🛜 Fetching lists via API`);
   const blocklistResponse = await axiosInstance.get(`${piholeUrl}/lists`);
 
   if (blocklistResponse.status !== 200) {
@@ -82,7 +82,7 @@ async function fetchListsFromPihole() {
 
 async function deleteExistingLists(lists) {
   if (lists.length === 0) return;
-  core.info(`Deleting existing lists`);
+  core.info(`🗑️ Deleting existing lists`);
 
   const requestBody = lists.map((list) => {
     return {
@@ -108,7 +108,7 @@ async function deleteExistingLists(lists) {
 }
 
 async function getBlocklistUrlsFromConfig() {
-  core.info(`Reading blocklist URLs from file: ${blocklistFile}`);
+  core.info(`📄 Reading blocklist URLs from file: ${blocklistFile}`);
   if (!fs.existsSync(blocklistFile)) {
     throw new Error(`Blocklist file not found: ${blocklistFile}`);
   }
@@ -124,7 +124,7 @@ async function getBlocklistUrlsFromConfig() {
 }
 
 async function addBlocklists(blocklistUrls) {
-  core.info(`Adding ${blocklistUrls.length} blocklists to Pi-hole`);
+  core.info(`💾 Adding ${blocklistUrls.length} blocklists to Pi-hole`);
   for (const url of blocklistUrls) {
     core.info(`Adding ${url}`);
     await axiosInstance.post(`${piholeUrl}/lists`, {
@@ -137,8 +137,9 @@ async function addBlocklists(blocklistUrls) {
 }
 
 async function logoutFromPihole() {
+  core.info("");
   try {
-    core.info(`Logging out from Pi-hole`);
+    core.info(`🔒 Logging out from Pi-hole`);
     await axiosInstance.delete(`${piholeUrl}/auth`);
     core.info(`Successfully logged out from Pi-hole`);
   } catch (error) {
