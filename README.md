@@ -52,19 +52,13 @@ jobs:
 | `blocklist-file`          | The file containing blocklists to sync                   | ✅       | `blocklists.txt`     |
 | `allow-self-signed-certs` | Allow self-signed SSL certificates (`true`/`false`)      | ❌       | `false`              |
 
-## 📤 Outputs
-
-| Output          | Description                           |
-| --------------- | ------------------------------------- |
-| `sync-status`   | Status of the synchronization process |
-| `lists-updated` | Number of blocklists updated          |
-
 ## 📁 Blocklist File Format
 
 Create a `blocklists.txt` file in your repository with one blocklist URL per line:
 
 ```text
 https://github.com/myblocklist.txt
+https://my-list.com/adlist.raw
 ```
 
 ## 🔐 Security Considerations
