@@ -36,7 +36,6 @@ async function run() {
     }
     const { session } = authResponse.data;
     const sid = session.sid;
-    console.log(session);
     core.info(`✅ Authentication successful`);
     core.info("");
 
