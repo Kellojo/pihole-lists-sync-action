@@ -46443,6 +46443,8 @@ function requireSrc () {
 	    core.error("Error occurred:", error.message);
 	    core.setFailed(`Action failed with error: ${error.message}`);
 	  }
+
+	  logoutFromPihole();
 	}
 
 	async function authenticateWithPihole() {
@@ -46536,6 +46538,16 @@ function requireSrc () {
 	  }
 	  core.info(`All blocklists added`);
 	  core.info("");
+	}
+
+	async function logoutFromPihole() {
+	  try {
+	    core.info(`Logging out from Pi-hole`);
+	    await axiosInstance.delete(`${piholeUrl}/auth`);
+	    core.info(`Successfully logged out from Pi-hole`);
+	  } catch (error) {
+	    core.error(`Failed to log out from Pi-hole: ${error.message}`);
+	  }
 	}
 
 	run();
