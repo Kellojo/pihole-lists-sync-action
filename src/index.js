@@ -26,13 +26,13 @@ const axiosInstance = axios.create({
 
 async function run() {
   try {
-    const sid = await authenticateWithPihole();
-    const existingLists = await fetchListsFromPihole(sid);
-    await deleteExistingLists(sid, existingLists);
+    await authenticateWithPihole();
+    const existingLists = await fetchListsFromPihole();
+    await deleteExistingLists(existingLists);
 
     const blocklistUrls = await getBlocklistUrlsFromConfig();
 
-    await addBlocklists(sid, blocklistUrls);
+    await addBlocklists(blocklistUrls);
 
     core.info("✅ Pi-hole blocklist sync completed successfully");
   } catch (error) {
@@ -55,19 +55,15 @@ async function authenticateWithPihole() {
   const sid = session.sid;
   core.setSecret(sid);
 
+  axiosInstance.defaults.headers.common["sid"] = sid;
+
   core.info(`Authentication successful, valid for ${session.validity} seconds`);
   core.info("");
-
-  return sid;
 }
 
-async function fetchListsFromPihole(sid) {
+async function fetchListsFromPihole() {
   core.info(`Fetching lists via API`);
-  const blocklistResponse = await axiosInstance.get(`${piholeUrl}/lists`, {
-    headers: {
-      sid: sid,
-    },
-  });
+  const blocklistResponse = await axiosInstance.get(`${piholeUrl}/lists`);
 
   if (blocklistResponse.status !== 200) {
     throw new Error(
@@ -82,7 +78,7 @@ async function fetchListsFromPihole(sid) {
   return lists;
 }
 
-async function deleteExistingLists(sid, lists) {
+async function deleteExistingLists(lists) {
   if (lists.length === 0) return;
   core.info(`Deleting existing lists`);
 
@@ -95,14 +91,9 @@ async function deleteExistingLists(sid, lists) {
 
   const deleteResponse = await axiosInstance.post(
     `${piholeUrl}/lists:batchDelete`,
-    requestBody,
-    {
-      headers: {
-        sid: sid,
-      },
-    }
+    requestBody
   );
-  if (deleteResponse.status !== 200) {
+  if (![200, 204].includes(deleteResponse.status)) {
     core.error(`Failed to delete existing lists`);
     console.info(JSON.stringify(deleteResponse.data, null, 2));
     throw new Error(
@@ -130,22 +121,14 @@ async function getBlocklistUrlsFromConfig() {
   return blocklistUrls;
 }
 
-async function addBlocklists(sid, blocklistUrls) {
+async function addBlocklists(blocklistUrls) {
   core.info(`Adding ${blocklistUrls.length} blocklists to Pi-hole`);
   for (const url of blocklistUrls) {
     core.info(`Adding ${url}`);
-    await axiosInstance.post(
-      `${piholeUrl}/lists`,
-      {
-        address: url,
-        type: "block",
-      },
-      {
-        headers: {
-          sid: sid,
-        },
-      }
-    );
+    await axiosInstance.post(`${piholeUrl}/lists`, {
+      address: url,
+      type: "block",
+    });
   }
   core.info(`All blocklists added`);
   core.info("");
