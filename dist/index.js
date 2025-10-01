@@ -46553,6 +46553,9 @@ function requireSrc () {
 	      `Failed to update gravity with status: ${gravityResponse.status} - ${gravityResponse.statusText}`
 	    );
 	  }
+
+	  core.info(`Gravity database updated successfully`);
+	  core.info("");
 	}
 
 	async function logoutFromPihole() {
