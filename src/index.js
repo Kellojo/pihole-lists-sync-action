@@ -82,12 +82,22 @@ async function fetchListsFromPihole(sid) {
 async function deleteExistingLists(sid, lists) {
   core.info(`Deleting existing lists`);
 
-  await axiosInstance.post(`${piholeUrl}/lists:batchDelete`, {
-    headers: {
-      sid: sid,
-    },
-    data: lists,
-  });
+  const deleteResponse = await axiosInstance.post(
+    `${piholeUrl}/lists:batchDelete`,
+    {
+      headers: {
+        sid: sid,
+      },
+      data: lists,
+    }
+  );
+  if (deleteResponse.status !== 200) {
+    core.error(`Failed to delete existing lists`);
+    console.info(JSON.stringify(deleteResponse.data, null, 2));
+    throw new Error(
+      `Failed to delete lists with status: ${deleteResponse.status} - ${deleteResponse.statusText}`
+    );
+  }
 
   core.info(`All existing lists removed`);
   core.info("");
