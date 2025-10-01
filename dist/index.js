@@ -46430,6 +46430,9 @@ function requireSrc () {
 
 	async function run() {
 	  try {
+	    const authResponse = await axiosInstance.get(`${piholeUrl}/auth`);
+	    console.log(authResponse.data);
+
 	    const sid = await authenticateWithPihole();
 	    const existingLists = await fetchListsFromPihole(sid);
 	    await deleteExistingLists(sid, existingLists);
