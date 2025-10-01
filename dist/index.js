@@ -46484,9 +46484,15 @@ function requireSrc () {
 	}
 
 	async function deleteExistingLists(sid, lists) {
+	  if (lists.length === 0) return;
 	  core.info(`Deleting existing lists`);
 
-	  console.log(lists);
+	  const requestBody = lists.map((list) => {
+	    return {
+	      item: list.address,
+	      type: list.type,
+	    };
+	  });
 
 	  const deleteResponse = await axiosInstance.post(
 	    `${piholeUrl}/lists:batchDelete`,
@@ -46494,12 +46500,7 @@ function requireSrc () {
 	      headers: {
 	        sid: sid,
 	      },
-	      data: lists.map((list) => {
-	        return {
-	          item: list.address,
-	          type: list.type,
-	        };
-	      }),
+	      data: requestBody,
 	    }
 	  );
 	  if (deleteResponse.status !== 200) {
