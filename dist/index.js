@@ -46415,10 +46415,16 @@ function requireSrc () {
 	});
 	const blocklistFile = core.getInput("blocklist-file", { required: true });
 	const allowSelfSigned = core.getInput("allow-self-signed-certs") === "true";
+	const localDnsCnameFile = core.getInput("local-dns-cname-file");
+	const localDnsFile = core.getInput("local-dns-file");
 
 	core.info(`🌐 Pi-hole URL: ${piholeUrl}`);
 	core.info(`📁 Blocklist File: ${blocklistFile}`);
 	core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
+	if (localDnsFile) core.info(`📁 Local DNS File: ${localDnsFile}`);
+	if (localDnsCnameFile)
+	  core.info(`📁 Local DNS CNAME File: ${localDnsCnameFile}`);
+
 	core.info("");
 
 	const axiosInstance = axios.create({
@@ -46431,16 +46437,8 @@ function requireSrc () {
 	async function run() {
 	  try {
 	    await authenticateWithPihole();
-	    const existingLists = await fetchListsFromPihole();
-	    await deleteExistingLists(existingLists);
-
-	    const blocklistUrls = await getBlocklistUrlsFromConfig();
-
-	    await addBlocklists(blocklistUrls);
-
-	    await updateGravity();
-
-	    core.info("✅ Pi-hole blocklist sync completed successfully");
+	    await applyLists();
+	    await applyLocalDnsSettings();
 	  } catch (error) {
 	    core.error("Error occurred:", error.message);
 	    core.setFailed(`Action failed with error: ${error.message}`);
@@ -46467,6 +46465,18 @@ function requireSrc () {
 
 	  core.info(`Authentication successful, valid for ${session.validity} seconds`);
 	  core.info("");
+	}
+
+	async function applyLists() {
+	  const existingLists = await fetchListsFromPihole();
+	  await deleteExistingLists(existingLists);
+
+	  const blocklistUrls = await getBlocklistUrlsFromConfig();
+
+	  await addBlocklists(blocklistUrls);
+
+	  await updateGravity();
+	  core.info("✅ Pi-hole blocklist sync completed successfully");
 	}
 
 	async function fetchListsFromPihole() {
@@ -46503,7 +46513,7 @@ function requireSrc () {
 	  );
 	  if (![200, 204].includes(deleteResponse.status)) {
 	    core.error(`Failed to delete existing lists`);
-	    console.info(JSON.stringify(deleteResponse.data, null, 2));
+
 	    throw new Error(
 	      `Failed to delete lists with status: ${deleteResponse.status} - ${deleteResponse.statusText}`
 	    );
@@ -46556,6 +46566,97 @@ function requireSrc () {
 
 	  core.info(`Gravity database updated successfully`);
 	  core.info("");
+	}
+
+	async function applyLocalDnsSettings() {
+	  if (!localDnsFile && !localDnsCnameFile) return;
+	  core.info("🔄 Updating local DNS records");
+	  const dnsConfig = await getDnsConfig();
+
+	  const localDnsRecords = await getLocalDnsRecords();
+	  if (localDnsRecords) {
+	    core.info(`💾 Adding local DNS records`);
+	    dnsConfig.hosts = localDnsRecords;
+	  }
+
+	  const localDnsCnameRecords = await getLocalDnsCnameRecords();
+	  if (localDnsCnameRecords) {
+	    core.info(`💾 Adding local DNS CNAME records`);
+	    dnsConfig.cnames = localDnsCnameRecords;
+	  }
+
+	  await updateDnsConfig(dnsConfig);
+	}
+
+	async function getDnsConfig() {
+	  core.info(`📡 Fetching DNS configuration`);
+	  const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
+	  if (dnsResponse.status !== 200) {
+	    throw new Error(
+	      `Failed to fetch DNS configuration with status: ${dnsResponse.status} - ${dnsResponse.statusText}`
+	    );
+	  }
+	  core.info(`DNS configuration fetched successfully`);
+	  core.info("");
+
+	  return dnsResponse.data.config.dns;
+	}
+
+	async function updateDnsConfig(dnsConfig) {
+	  core.info(`📡 Updating DNS configuration`);
+	  const updateResponse = await axiosInstance.post(`${piholeUrl}/config/dns`, {
+	    config: {
+	      dns: dnsConfig,
+	    },
+	  });
+	  if (updateResponse.status !== 200) {
+	    throw new Error(
+	      `Failed to update DNS configuration with status: ${updateResponse.status} - ${updateResponse.statusText}`
+	    );
+	  }
+	  core.info(`✅ DNS configuration updated successfully`);
+	  core.info("");
+	}
+
+	async function getLocalDnsRecords() {
+	  if (!localDnsFile) return null;
+
+	  core.info(`📄 Reading local DNS records from file: ${localDnsFile}`);
+	  if (!fs.existsSync(localDnsFile)) {
+	    throw new Error(`Local DNS file not found: ${localDnsFile}`);
+	  }
+
+	  const localDnsRecords = fs
+	    .readFileSync(localDnsFile, "utf-8")
+	    .split("\n")
+	    .map((line) => line.trim())
+	    .filter((line) => line && !line.startsWith("#"));
+
+	  core.info(`Found ${localDnsRecords.length} local DNS records in file`);
+	  core.info("");
+	  return localDnsRecords;
+	}
+
+	async function getLocalDnsCnameRecords() {
+	  if (!localDnsCnameFile) return null;
+
+	  core.info(
+	    `📄 Reading local DNS CNAME records from file: ${localDnsCnameFile}`
+	  );
+	  if (!fs.existsSync(localDnsCnameFile)) {
+	    throw new Error(`Local DNS CNAME file not found: ${localDnsCnameFile}`);
+	  }
+	  const localDnsCnameRecords = fs
+	    .readFileSync(localDnsCnameFile, "utf-8")
+	    .split("\n")
+	    .map((line) => line.trim())
+	    .filter((line) => line && !line.startsWith("#"));
+
+	  core.info(
+	    `Found ${localDnsCnameRecords.length} local DNS CNAME records in file`
+	  );
+	  core.info("");
+	  return localDnsCnameRecords;
 	}
 
 	async function logoutFromPihole() {
