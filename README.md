@@ -10,6 +10,11 @@ A GitHub Action that syncs Pi-hole blocklists from a specified source to a Pi-ho
 - **Automated Blocklist Sync**: Sync blocklists from external sources to your Pi-hole instance
 - **Self-Signed Certificate Support**: Option to allow self-signed SSL certificates for local Pi-hole instances
 
+### Planned
+- Allow list sync
+- Local DNS record sync
+- Local CNAME record sync
+
 ## 📋 Prerequisites
 
 - A running Pi-hole instance with API access enabled
