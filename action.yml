@@ -20,10 +20,6 @@ inputs:
     required: true
     default: "blocklists.txt"
 
-outputs:
-  greeting:
-    description: "The greeting message that was printed"
-
 runs:
   using: "node20"
   main: "dist/index.js"
