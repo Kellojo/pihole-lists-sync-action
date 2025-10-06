@@ -54326,27 +54326,18 @@ function requireSrc () {
 	}
 
 	async function applyLocalDnsSettings(piholeConfig) {
-	  const localDnsRecords = piholeConfig.localDnsRecords;
-	  const bHasAnyLocalDnsRecords =
-	    localDnsRecords && Array.isArray(localDnsRecords);
-
-	  const localDnsCnameRecords = piholeConfig.localDnsCnames;
-	  const bHasAnyLocalDnsCnameRecords =
-	    localDnsCnameRecords && Array.isArray(localDnsCnameRecords);
-
-	  if (!bHasAnyLocalDnsRecords && !bHasAnyLocalDnsCnameRecords) {
-	    core.info(
-	      "⏭️ Skipping local DNS sync as no localDnsRecords or localDnsCnames sections are defined in the config file."
-	    );
-	    return;
-	  }
-
 	  core.info("🔄 Updating local DNS records");
-	  const dnsConfig = await getDnsConfig();
+	  const config = {
+	    dns: {
+	      hosts: [],
+	      cnames: [],
+	    },
+	  };
 
-	  if (bHasAnyLocalDnsRecords) {
+	  const localDnsRecords = piholeConfig.localDnsRecords;
+	  if (localDnsRecords && Array.isArray(localDnsRecords)) {
 	    core.info(`💾 Adding local DNS records`);
-	    dnsConfig.hosts = localDnsRecords.map((record) => {
+	    config.dns.hosts = localDnsRecords.map((record) => {
 	      return `${record.ip.trim()} ${record.domain.trim()}`;
 	    });
 	  } else {
@@ -54355,10 +54346,11 @@ function requireSrc () {
 	    );
 	  }
 
-	  if (bHasAnyLocalDnsCnameRecords) {
+	  const localDnsCnameRecords = piholeConfig.localDnsCnames;
+	  if (localDnsCnameRecords && Array.isArray(localDnsCnameRecords)) {
 	    core.info(`💾 Adding local DNS CNAME records`);
 
-	    dnsConfig.cnames = localDnsCnameRecords.map((record) => {
+	    config.dns.cnames = localDnsCnameRecords.map((record) => {
 	      return `${record.domain.trim()},${record.target.trim()}`;
 	    });
 	  } else {
@@ -54367,37 +54359,24 @@ function requireSrc () {
 	    );
 	  }
 
-	  await updateDnsConfig(dnsConfig);
-	}
-	async function getDnsConfig() {
-	  core.info("Getting existing config from Pi-hole");
-
-	  // Pi-hole API quirk: First request often fails, so we ignore any errors here
-	  try {
-	    await axiosInstance.get(`${piholeUrl}/config/dns`);
-	  } catch (error) {}
-
-	  const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
-	  if (dnsResponse.status !== 200) {
-	    throw new Error(
-	      `Failed to fetch DNS configuration with status: ${dnsResponse.status} - ${dnsResponse.statusText}`
+	  if (!config.dns.hosts && !config.dns.cnames.length) {
+	    core.info(
+	      "⏭️ Skipping local DNS sync as no localDnsRecords or localDnsCnames sections are defined in the config file."
 	    );
+	    return;
 	  }
-	  core.info(`DNS configuration fetched successfully`);
-	  console.log("");
-	  console.log(dnsResponse.data);
-	  return dnsResponse.data.config.dns;
+
+	  await patchPiholeConfig(config);
 	}
-	async function updateDnsConfig(dnsConfig) {
-	  core.info(`📡 Updating Pi-hole DNS configuration`);
-	  const updateResponse = await axiosInstance.post(`${piholeUrl}/config/dns`, {
-	    config: {
-	      dns: dnsConfig,
-	    },
-	  });
+	async function patchPiholeConfig(config) {
+	  core.info(`Updating Pi-hole DNS configuration via API`);
+	  const updateResponse = await axiosInstance.post(
+	    `${piholeUrl}/config`,
+	    config
+	  );
 	  if (updateResponse.status !== 200) {
 	    throw new Error(
-	      `Failed to update DNS configuration with status: ${updateResponse.status} - ${updateResponse.statusText}`
+	      `Failed to update Pi-hole config with status: ${updateResponse.status} - ${updateResponse.statusText}`
 	    );
 	  }
 	  core.info(`✅ DNS configuration updated successfully`);
