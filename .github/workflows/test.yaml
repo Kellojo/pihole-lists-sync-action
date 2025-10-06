@@ -17,12 +17,6 @@ jobs:
         env:
           TZ: Europe/Berlin
           FTLCONF_webserver_api_password: test123
-        ports:
-          - "80:80"
-          - "443:443"
-        volumes:
-          - ./pihole_data:/etc/pihole
-          - ./dnsmasq_data:/etc/dnsmasq.d
 
     steps:
       - name: Checkout repository
