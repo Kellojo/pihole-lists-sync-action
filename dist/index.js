@@ -54365,7 +54365,7 @@ function requireSrc () {
 	    );
 	  }
 
-	  core.info(config.dns);
+	  console.log(config.dns);
 	  if (!config.dns.hosts && !config.dns.cnames.length) {
 	    core.info(
 	      "⏭️ Skipping local DNS sync as no localDnsRecords or localDnsCnames sections are defined in the config file."
