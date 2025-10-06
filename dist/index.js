@@ -54215,7 +54215,7 @@ function requireSrc () {
 	const fs = require$$1;
 	const yaml = require$$5;
 
-	axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay });
+	axiosRetry(axios, { retries: 3, retryCondition: () => true });
 
 	core.info("Starting Pi-hole config sync...");
 
