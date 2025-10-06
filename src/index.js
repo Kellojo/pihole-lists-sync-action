@@ -158,6 +158,7 @@ async function applyLocalDnsSettings(piholeConfig) {
 }
 async function getDnsConfig() {
   core.info("Getting existing config from Pi-hole");
+  console.log(`${piholeUrl}/config/dns`);
   const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
   console.log(dnsResponse.data);
   if (dnsResponse.status !== 200) {
@@ -237,8 +238,13 @@ async function getPiholeConfig() {
     throw new Error(`Pi-hole config file not found: ${configFile}`);
   }
 
-  const config = fs.readFileSync(configFile, "utf-8");
-  return yaml.parse(config);
+  const content = fs.readFileSync(configFile, "utf-8");
+  core.info(`Pi-hole config file read successfully`);
+  core.info(`Parsing config file`);
+  const config = yaml.parse(content);
+  console.log("");
+
+  return config;
 }
 
 run();
