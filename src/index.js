@@ -1,11 +1,11 @@
 const core = require("@actions/core");
-const axios = require("axios");
+let axios = require("axios");
 const axiosRetry = require("axios-retry").default;
 const https = require("https");
 const fs = require("fs");
 const yaml = require("yaml");
 
-axiosRetry(axios, {
+axios = axiosRetry(axios, {
   retries: 3,
   retryCondition: () => true,
   onRetry: () => {

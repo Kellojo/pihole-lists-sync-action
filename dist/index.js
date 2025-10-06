@@ -54209,13 +54209,13 @@ function requireSrc () {
 	if (hasRequiredSrc) return src;
 	hasRequiredSrc = 1;
 	const core = requireCore();
-	const axios = /*@__PURE__*/ requireAxios();
+	let axios = /*@__PURE__*/ requireAxios();
 	const axiosRetry = requireCjs().default;
 	const https = require$$3;
 	const fs = require$$1;
 	const yaml = require$$5;
 
-	axiosRetry(axios, {
+	axios = axiosRetry(axios, {
 	  retries: 3,
 	  retryCondition: () => true,
 	  onRetry: () => {
