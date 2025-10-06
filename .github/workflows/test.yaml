@@ -33,7 +33,7 @@ jobs:
         uses: ./
         with:
           pihole-app-password: "test123"
-          pihole-url: "http://localhost/api"
+          pihole-url: "http://pihole/api"
           pihole-config-file: "./test/pihole-config-example.yaml"
 
       - name: Stop Pi-hole container
