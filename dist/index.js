@@ -54301,7 +54301,6 @@ function requireSrc () {
 	    };
 	  });
 
-	  console.log(requestBody);
 	  const deleteResponse = await axiosInstance.post(
 	    `${piholeUrl}/lists:batchDelete`,
 	    requestBody

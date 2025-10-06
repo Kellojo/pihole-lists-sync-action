@@ -91,7 +91,6 @@ async function deleteExistingLists(lists) {
     };
   });
 
-  console.log(requestBody);
   const deleteResponse = await axiosInstance.post(
     `${piholeUrl}/lists:batchDelete`,
     requestBody
