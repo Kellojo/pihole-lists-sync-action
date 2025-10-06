@@ -53968,6 +53968,7 @@ function requireSrc () {
 
 	  await updateGravity();
 	  core.info("✅ Pi-hole blocklist sync completed successfully");
+	  console.log("");
 	}
 	async function fetchListsFromPihole() {
 	  core.info(`🛜 Fetching lists via API`);
@@ -54041,7 +54042,6 @@ function requireSrc () {
 	  }
 
 	  core.info("🔄 Updating local DNS records");
-	  core.info("Getting existing config from Pi-hole");
 	  const dnsConfig = await getDnsConfig();
 
 	  if (bHasAnyLocalDnsRecords) {
@@ -54070,8 +54070,9 @@ function requireSrc () {
 	  await updateDnsConfig(dnsConfig);
 	}
 	async function getDnsConfig() {
-	  core.info(`📡 Fetching DNS configuration`);
+	  core.info("Getting existing config from Pi-hole");
 	  const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
+	  console.log(dnsResponse.data);
 	  if (dnsResponse.status !== 200) {
 	    throw new Error(
 	      `Failed to fetch DNS configuration with status: ${dnsResponse.status} - ${dnsResponse.statusText}`
