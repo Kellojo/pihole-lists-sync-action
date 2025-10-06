@@ -156,18 +156,17 @@ async function applyLocalDnsSettings(piholeConfig) {
     return;
   }
 
-  try {
+  /*try {
     await axiosInstance.get(`${piholeUrl}/config`);
-  } catch (error) {}
+  } catch (error) {}*/
 
   await patchPiholeConfig(config);
 }
 async function patchPiholeConfig(config) {
   core.info(`Updating Pi-hole DNS configuration via API`);
-  const updateResponse = await axiosInstance.patch(
-    `${piholeUrl}/config`,
-    config
-  );
+  const updateResponse = await axiosInstance.patch(`${piholeUrl}/config`, {
+    config: config,
+  });
   if (updateResponse.status !== 200) {
     throw new Error(
       `Failed to update Pi-hole config with status: ${updateResponse.status} - ${updateResponse.statusText}`
