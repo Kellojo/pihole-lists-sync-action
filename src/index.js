@@ -1,20 +1,11 @@
 const core = require("@actions/core");
-let axios = require("axios");
+const axios = require("axios");
 const axiosRetry = require("axios-retry").default;
 const https = require("https");
 const fs = require("fs");
 const yaml = require("yaml");
 
-axios = axiosRetry(axios, {
-  retries: 3,
-  retryCondition: () => true,
-  onRetry: () => {
-    console.log("Retrying request...");
-  },
-});
-
 core.info("Starting Pi-hole config sync...");
-
 const piholeUrl = core.getInput("pihole-url", { required: true });
 const piholePassword = core.getInput("pihole-app-password", {
   required: true,
@@ -27,11 +18,17 @@ core.info(`📁 Pi-hole Config File: ${configFile}`);
 core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
 core.info("");
 
-const axiosInstance = axios.create({
+let axiosInstance = axios.create({
   httpsAgent: new https.Agent({
     rejectUnauthorized: !allowSelfSigned,
   }),
   timeout: 30000,
+});
+axiosInstance = axiosRetry(axiosInstance, {
+  retries: 3,
+  onRetry: () => {
+    core.info("Retrying request...");
+  },
 });
 
 async function run() {

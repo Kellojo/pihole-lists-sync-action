@@ -54209,22 +54209,13 @@ function requireSrc () {
 	if (hasRequiredSrc) return src;
 	hasRequiredSrc = 1;
 	const core = requireCore();
-	let axios = /*@__PURE__*/ requireAxios();
+	const axios = /*@__PURE__*/ requireAxios();
 	const axiosRetry = requireCjs().default;
 	const https = require$$3;
 	const fs = require$$1;
 	const yaml = require$$5;
 
-	axios = axiosRetry(axios, {
-	  retries: 3,
-	  retryCondition: () => true,
-	  onRetry: () => {
-	    console.log("Retrying request...");
-	  },
-	});
-
 	core.info("Starting Pi-hole config sync...");
-
 	const piholeUrl = core.getInput("pihole-url", { required: true });
 	const piholePassword = core.getInput("pihole-app-password", {
 	  required: true,
@@ -54237,11 +54228,17 @@ function requireSrc () {
 	core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
 	core.info("");
 
-	const axiosInstance = axios.create({
+	let axiosInstance = axios.create({
 	  httpsAgent: new https.Agent({
 	    rejectUnauthorized: !allowSelfSigned,
 	  }),
 	  timeout: 30000,
+	});
+	axiosInstance = axiosRetry(axiosInstance, {
+	  retries: 3,
+	  onRetry: () => {
+	    core.info("Retrying request...");
+	  },
 	});
 
 	async function run() {
