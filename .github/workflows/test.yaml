@@ -34,9 +34,3 @@ jobs:
           pihole-app-password: "test123"
           pihole-url: "http://pihole/api"
           pihole-config-file: "./test/pihole-config-example.yaml"
-
-      - name: Stop Pi-hole container
-        if: always()
-        run: |
-          cd test
-          docker compose down
