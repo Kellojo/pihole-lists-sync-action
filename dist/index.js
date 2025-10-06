@@ -54346,6 +54346,7 @@ function requireSrc () {
 	      return `${record.ip.trim()} ${record.domain.trim()}`;
 	    });
 	  } else {
+	    delete config.dns.hosts;
 	    core.info(
 	      "⏭️ Skipping local DNS record sync as no localDnsRecords are defined in the config file."
 	    );
@@ -54360,6 +54361,7 @@ function requireSrc () {
 	      return `${record.domain.trim()},${record.target.trim()}`;
 	    });
 	  } else {
+	    delete config.dns.cnames;
 	    core.info(
 	      "⏭️ Skipping local DNS CNAME sync as no localDnsCnames are defined in the config file."
 	    );
