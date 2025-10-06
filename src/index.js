@@ -5,7 +5,7 @@ const https = require("https");
 const fs = require("fs");
 const yaml = require("yaml");
 
-axiosRetry(axios, { retries: 3, retryCondition: () => true });
+axiosRetry(axios, { retries: 3 });
 
 core.info("Starting Pi-hole config sync...");
 
@@ -162,6 +162,10 @@ async function applyLocalDnsSettings(piholeConfig) {
 async function getDnsConfig() {
   core.info("Getting existing config from Pi-hole");
   console.log(`${piholeUrl}/config/dns`);
+
+  try {
+    await axiosInstance.get(`${piholeUrl}/config/dns`);
+  } catch (error) {}
 
   const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
   if (dnsResponse.status !== 200) {
