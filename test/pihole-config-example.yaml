@@ -1,0 +1,16 @@
+---
+blocklists:
+  - https://www.my-list.com/list.txt
+  - https://www.my-other-list.com/list.txt
+
+localDnsRecords:
+  - domain: my.home
+    ip: 192.168.1.10
+  - domain: friend.home
+    ip: 192.168.1.11
+
+localDnsCnames:
+  - domain: alias.my.home
+    target: my.home
+  - domain: git.my.home
+    target: my.home

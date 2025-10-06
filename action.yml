@@ -15,18 +15,10 @@ inputs:
     required: false
     default: false
 
-  blocklist-file:
-    description: "The file of blocklists to sync"
+  pihole-config-file:
+    description: "The file of Pi-hole configuration to sync"
     required: true
-    default: "blocklists.txt"
-
-  local-dns-cname-file:
-    description: "The file of local DNS CNAME records"
-    required: false
-
-  local-dns-file:
-    description: "The file of local DNS records"
-    required: false
+    default: "pihole-config.yaml"
 
 runs:
   using: "node20"

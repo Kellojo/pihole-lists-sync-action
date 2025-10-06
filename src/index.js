@@ -2,25 +2,20 @@ const core = require("@actions/core");
 const axios = require("axios");
 const https = require("https");
 const fs = require("fs");
+const yaml = require("yaml");
 
-core.info("Starting Pi-hole blocklist sync...");
+core.info("Starting Pi-hole config sync...");
 
 const piholeUrl = core.getInput("pihole-url", { required: true });
 const piholePassword = core.getInput("pihole-app-password", {
   required: true,
 });
-const blocklistFile = core.getInput("blocklist-file", { required: true });
+const configFile = core.getInput("pihole-config-file", { required: true });
 const allowSelfSigned = core.getInput("allow-self-signed-certs") === "true";
-const localDnsCnameFile = core.getInput("local-dns-cname-file");
-const localDnsFile = core.getInput("local-dns-file");
 
 core.info(`🌐 Pi-hole URL: ${piholeUrl}`);
-core.info(`📁 Blocklist File: ${blocklistFile}`);
+core.info(`📁 Pi-hole Config File: ${configFile}`);
 core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
-if (localDnsFile) core.info(`📁 Local DNS File: ${localDnsFile}`);
-if (localDnsCnameFile)
-  core.info(`📁 Local DNS CNAME File: ${localDnsCnameFile}`);
-
 core.info("");
 
 const axiosInstance = axios.create({
@@ -32,9 +27,10 @@ const axiosInstance = axios.create({
 
 async function run() {
   try {
+    const piholeConfig = await getPiholeConfig();
     await authenticateWithPihole();
-    await applyLists();
-    await applyLocalDnsSettings();
+    await applyLists(piholeConfig);
+    await applyLocalDnsSettings(piholeConfig);
   } catch (error) {
     core.error("Error occurred:", error.message);
     core.setFailed(`Action failed with error: ${error.message}`);
@@ -43,38 +39,23 @@ async function run() {
   logoutFromPihole();
 }
 
-async function authenticateWithPihole() {
-  core.info(`🔑 Authenticating with Pi-hole`);
-  const authResponse = await axiosInstance.post(`${piholeUrl}/auth`, {
-    password: piholePassword,
-  });
-  if (authResponse.status !== 200) {
-    throw new Error(
-      `Authentication failed with status: ${authResponse.status} - ${authResponse.statusText}`
+async function applyLists(piholeConfig) {
+  if (!piholeConfig.blocklists || !Array.isArray(piholeConfig.blocklists)) {
+    core.info(
+      "⏭️ Skipping blocklist sync as no blocklists are defined in the config file."
     );
+    return;
   }
-  const { session } = authResponse.data;
-  const sid = session.sid;
-  core.setSecret(sid);
 
-  axiosInstance.defaults.headers.common["sid"] = sid;
-
-  core.info(`Authentication successful, valid for ${session.validity} seconds`);
-  core.info("");
-}
-
-async function applyLists() {
   const existingLists = await fetchListsFromPihole();
   await deleteExistingLists(existingLists);
 
-  const blocklistUrls = await getBlocklistUrlsFromConfig();
-
+  const blocklistUrls = piholeConfig.blocklists;
   await addBlocklists(blocklistUrls);
 
   await updateGravity();
   core.info("✅ Pi-hole blocklist sync completed successfully");
 }
-
 async function fetchListsFromPihole() {
   core.info(`🛜 Fetching lists via API`);
   const blocklistResponse = await axiosInstance.get(`${piholeUrl}/lists`);
@@ -91,7 +72,6 @@ async function fetchListsFromPihole() {
 
   return lists;
 }
-
 async function deleteExistingLists(lists) {
   if (lists.length === 0) return;
   core.info(`🗑️ Deleting existing lists`);
@@ -118,24 +98,6 @@ async function deleteExistingLists(lists) {
   core.info(`All existing lists removed`);
   core.info("");
 }
-
-async function getBlocklistUrlsFromConfig() {
-  core.info(`📄 Reading blocklist URLs from file: ${blocklistFile}`);
-  if (!fs.existsSync(blocklistFile)) {
-    throw new Error(`Blocklist file not found: ${blocklistFile}`);
-  }
-
-  const blocklistUrls = fs
-    .readFileSync(blocklistFile, "utf-8")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith("#"));
-
-  core.info(`Found ${blocklistUrls.length} URLs in blocklist file`);
-  core.info("");
-  return blocklistUrls;
-}
-
 async function addBlocklists(blocklistUrls) {
   core.info(`💾 Adding ${blocklistUrls.length} blocklists to Pi-hole`);
   for (const url of blocklistUrls) {
@@ -146,6 +108,80 @@ async function addBlocklists(blocklistUrls) {
     });
   }
   core.info(`All blocklists added`);
+  core.info("");
+}
+
+async function applyLocalDnsSettings(piholeConfig) {
+  const localDnsRecords = piholeConfig.localDnsRecordsFile;
+  const bHasAnyLocalDnsRecords =
+    localDnsRecords && Array.isArray(localDnsRecords);
+
+  const localDnsCnameRecords = piholeConfig.localDnsCnames;
+  const bHasAnyLocalDnsCnameRecords =
+    localDnsCnameRecords && Array.isArray(localDnsCnameRecords);
+
+  if (!bHasAnyLocalDnsRecords && !bHasAnyLocalDnsCnameRecords) {
+    core.info(
+      "⏭️ Skipping local DNS sync as no localDnsRecords or localDnsCnames sections are defined in the config file."
+    );
+    return;
+  }
+
+  core.info("🔄 Updating local DNS records");
+  core.info("Getting existing config from Pi-hole");
+  const dnsConfig = await getDnsConfig();
+
+  if (bHasAnyLocalDnsRecords) {
+    core.info(`💾 Adding local DNS records`);
+    dnsConfig.hosts = localDnsRecords.map((record) => {
+      return `${record.ip.trim()} ${record.domain.trim()}`;
+    });
+  } else {
+    core.info(
+      "⏭️ Skipping local DNS record sync as no localDnsRecords are defined in the config file."
+    );
+  }
+
+  if (bHasAnyLocalDnsCnameRecords) {
+    core.info(`💾 Adding local DNS CNAME records`);
+
+    dnsConfig.cnames = localDnsCnameRecords.map((record) => {
+      return `${record.domain.trim()},${record.target.trim()}`;
+    });
+  } else {
+    core.info(
+      "⏭️ Skipping local DNS CNAME sync as no localDnsCnames are defined in the config file."
+    );
+  }
+
+  await updateDnsConfig(dnsConfig);
+}
+async function getDnsConfig() {
+  core.info(`📡 Fetching DNS configuration`);
+  const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
+  if (dnsResponse.status !== 200) {
+    throw new Error(
+      `Failed to fetch DNS configuration with status: ${dnsResponse.status} - ${dnsResponse.statusText}`
+    );
+  }
+  core.info(`DNS configuration fetched successfully`);
+  core.info("");
+
+  return dnsResponse.data.config.dns;
+}
+async function updateDnsConfig(dnsConfig) {
+  core.info(`📡 Updating Pi-hole DNS configuration`);
+  const updateResponse = await axiosInstance.post(`${piholeUrl}/config/dns`, {
+    config: {
+      dns: dnsConfig,
+    },
+  });
+  if (updateResponse.status !== 200) {
+    throw new Error(
+      `Failed to update DNS configuration with status: ${updateResponse.status} - ${updateResponse.statusText}`
+    );
+  }
+  core.info(`✅ DNS configuration updated successfully`);
   core.info("");
 }
 
@@ -164,97 +200,25 @@ async function updateGravity() {
   core.info("");
 }
 
-async function applyLocalDnsSettings() {
-  if (!localDnsFile && !localDnsCnameFile) return;
-  core.info("🔄 Updating local DNS records");
-  const dnsConfig = await getDnsConfig();
-
-  const localDnsRecords = await getLocalDnsRecords();
-  if (localDnsRecords) {
-    core.info(`💾 Adding local DNS records`);
-    dnsConfig.hosts = localDnsRecords;
-  }
-
-  const localDnsCnameRecords = await getLocalDnsCnameRecords();
-  if (localDnsCnameRecords) {
-    core.info(`💾 Adding local DNS CNAME records`);
-    dnsConfig.cnames = localDnsCnameRecords;
-  }
-
-  await updateDnsConfig(dnsConfig);
-}
-
-async function getDnsConfig() {
-  core.info(`📡 Fetching DNS configuration`);
-  const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
-  if (dnsResponse.status !== 200) {
-    throw new Error(
-      `Failed to fetch DNS configuration with status: ${dnsResponse.status} - ${dnsResponse.statusText}`
-    );
-  }
-  core.info(`DNS configuration fetched successfully`);
-  core.info("");
-
-  return dnsResponse.data.config.dns;
-}
-
-async function updateDnsConfig(dnsConfig) {
-  core.info(`📡 Updating DNS configuration`);
-  const updateResponse = await axiosInstance.post(`${piholeUrl}/config/dns`, {
-    config: {
-      dns: dnsConfig,
-    },
+async function authenticateWithPihole() {
+  core.info(`🔑 Authenticating with Pi-hole`);
+  const authResponse = await axiosInstance.post(`${piholeUrl}/auth`, {
+    password: piholePassword,
   });
-  if (updateResponse.status !== 200) {
+  if (authResponse.status !== 200) {
     throw new Error(
-      `Failed to update DNS configuration with status: ${updateResponse.status} - ${updateResponse.statusText}`
+      `Authentication failed with status: ${authResponse.status} - ${authResponse.statusText}`
     );
   }
-  core.info(`✅ DNS configuration updated successfully`);
+  const { session } = authResponse.data;
+  const sid = session.sid;
+  core.setSecret(sid);
+
+  axiosInstance.defaults.headers.common["sid"] = sid;
+
+  core.info(`Authentication successful, valid for ${session.validity} seconds`);
   core.info("");
 }
-
-async function getLocalDnsRecords() {
-  if (!localDnsFile) return null;
-
-  core.info(`📄 Reading local DNS records from file: ${localDnsFile}`);
-  if (!fs.existsSync(localDnsFile)) {
-    throw new Error(`Local DNS file not found: ${localDnsFile}`);
-  }
-
-  const localDnsRecords = fs
-    .readFileSync(localDnsFile, "utf-8")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith("#"));
-
-  core.info(`Found ${localDnsRecords.length} local DNS records in file`);
-  core.info("");
-  return localDnsRecords;
-}
-
-async function getLocalDnsCnameRecords() {
-  if (!localDnsCnameFile) return null;
-
-  core.info(
-    `📄 Reading local DNS CNAME records from file: ${localDnsCnameFile}`
-  );
-  if (!fs.existsSync(localDnsCnameFile)) {
-    throw new Error(`Local DNS CNAME file not found: ${localDnsCnameFile}`);
-  }
-  const localDnsCnameRecords = fs
-    .readFileSync(localDnsCnameFile, "utf-8")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith("#"));
-
-  core.info(
-    `Found ${localDnsCnameRecords.length} local DNS CNAME records in file`
-  );
-  core.info("");
-  return localDnsCnameRecords;
-}
-
 async function logoutFromPihole() {
   core.info("");
   try {
@@ -264,6 +228,16 @@ async function logoutFromPihole() {
   } catch (error) {
     core.error(`Failed to log out from Pi-hole: ${error.message}`);
   }
+}
+
+async function getPiholeConfig() {
+  core.info(`📄 Reading Pi-hole config from file: ${configFile}`);
+  if (!fs.existsSync(configFile)) {
+    throw new Error(`Pi-hole config file not found: ${configFile}`);
+  }
+
+  const config = fs.readFileSync(configFile, "utf-8");
+  return yaml.parse(config);
 }
 
 run();

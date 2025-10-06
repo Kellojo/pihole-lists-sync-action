@@ -8,12 +8,12 @@ A GitHub Action that syncs Pi-hole blocklists from a specified source to a Pi-ho
 ## 🚀 Features
 
 - **Automated Blocklist Sync**: Sync blocklists from external sources to your Pi-hole instance
+- **Local DNS Records**: Add local DNS records and CNAMEs to your Pi-hole configuration
 - **Self-Signed Certificate Support**: Option to allow self-signed SSL certificates for local Pi-hole instances
 
 ### Planned
+
 - Allow list sync
-- Local DNS record sync
-- Local CNAME record sync
 
 ## 📋 Prerequisites
 
@@ -45,7 +45,7 @@ jobs:
         with:
           pihole-url: "https://your-pihole.local/api"
           pihole-app-password: ${{ secrets.PIHOLE_PASSWORD }}
-          blocklist-file: "blocklists.txt"
+          pihole-config-file: "pihole-config.yaml"
 ```
 
 ## ⚙️ Inputs
@@ -54,16 +54,29 @@ jobs:
 | ------------------------- | -------------------------------------------------------- | -------- | -------------------- |
 | `pihole-url`              | The URL of the Pi-hole instance API endpoint             | ✅       | `http://pi.hole/api` |
 | `pihole-app-password`     | The admin password or API token for the Pi-hole instance | ✅       | -                    |
-| `blocklist-file`          | The file containing blocklists to sync                   | ✅       | `blocklists.txt`     |
+| `pihole-config-file`      | The file containing Pi-hole configuration to sync        | ✅       | `pihole-config.yaml` |
 | `allow-self-signed-certs` | Allow self-signed SSL certificates (`true`/`false`)      | ❌       | `false`              |
 
-## 📁 Blocklist File Format
+## 📁 Pi-hole Config File Format
 
-Create a `blocklists.txt` file in your repository with one blocklist URL per line:
+Create a `pihole-config.yaml` file in your repository with the following structure:
 
-```text
-https://github.com/myblocklist.txt
-https://my-list.com/adlist.raw
+```yaml
+blocklists:
+  - https://www.my-list.com/list.txt
+  - https://www.my-other-list.com/list.txt
+
+localDnsRecords:
+  - domain: my.home
+    ip: 192.168.1.10
+  - domain: friend.home
+    ip: 192.168.1.11
+
+localDnsCnames:
+  - domain: alias.my.home
+    target: my.home
+  - domain: git.my.home
+    target: my.home
 ```
 
 ## 🔐 Security Considerations
@@ -75,7 +88,7 @@ Always store sensitive information like Pi-hole passwords in GitHub Secrets:
 1. Go to your repository → Settings → Secrets and variables → Actions
 2. Click "New repository secret"
 3. Name: `PIHOLE_PASSWORD`
-4. Value: Your Pi-hole admin password
+4. Value: Your Pi-hole app password
 
 ### Self-Signed Certificates
 
@@ -95,9 +108,9 @@ When using self-signed certificates:
 Error: Authentication failed with status: 401 - Unauthorized
 ```
 
-- Verify the Pi-hole admin password is correct
-- Ensure the Pi-hole URL includes the correct API endpoint
-- Check that the Pi-hole API is enabled
+- Verify the Pi-hole app password is correct
+- Ensure the Pi-hole URL is correct
+- Check that the Pi-hole API is enabled and destructive operations are allowed
 
 **SSL Certificate Error**
 
@@ -107,9 +120,6 @@ Error: self signed certificate
 
 - Set `allow-self-signed-certs: true` for self-signed certificates
 - Verify the Pi-hole URL uses the correct protocol (http/https)
-
-
-
 
 ## 📝 License
 
