@@ -11,34 +11,29 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      pihole:
+        image: pihole/pihole:latest
+        container_name: pihole
+        environment:
+          - TZ=Europe/Berlin
+          - FTLCONF_webserver_api_password=test123
+        ports:
+          - "80:80"
+          - "443:443"
+        volumes:
+          - ./pihole_data:/etc/pihole
+          - ./dnsmasq_data:/etc/dnsmasq.d
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Set up Docker
-        uses: docker/setup-docker-action@v4
-
-      - name: Start Pi-hole container
-        run: |
-          cd test
-          docker compose up -d
-
-      - name: Wait for Pi-hole to be ready
-        run: |
-          echo "Waiting for Pi-hole to be ready..."
-
-          # Wait for container to be responsive
-          echo "Checking container health..."
-          until docker ps --filter "name=pihole" --filter "health=healthy" | grep -q pihole 2>/dev/null || [ $? -eq 0 ]; do
-            sleep 2
-            echo "Container still starting..."
-          done
 
       - name: Run tests
         uses: ./
         with:
           pihole-app-password: "test123"
-          pihole-url: "http://127.0.0.1:80/api"
+          pihole-url: "http://localhost/api"
           pihole-config-file: "./test/pihole-config-example.yaml"
 
       - name: Stop Pi-hole container
