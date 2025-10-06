@@ -4,8 +4,9 @@
   "description": "A simple GitHub Action that prints \"Hello World\" to the console during its run.",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\"",
+    "test": "npx prettier . --check",
     "test-act": "act push",
+    "format": "npx prettier . --write",
     "build": "rollup --config rollup.config.js"
   },
   "repository": {
