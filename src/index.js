@@ -28,7 +28,7 @@ axiosRetry(axiosInstance, {
   retries: 3,
   retryCondition: () => true,
   onRetry: () => {
-    core.info("Retrying request...");
+    core.info("Retrying failed API request...");
   },
 });
 
