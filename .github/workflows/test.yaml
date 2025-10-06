@@ -17,6 +17,10 @@ jobs:
         env:
           TZ: Europe/Berlin
           FTLCONF_webserver_api_password: test123
+        options: >-
+          --health-interval 4s
+          --health-timeout 2s
+          --health-retries 25
 
     steps:
       - name: Checkout repository
