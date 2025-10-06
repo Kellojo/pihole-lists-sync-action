@@ -31,5 +31,5 @@ jobs:
         uses: ./
         with:
           pihole-app-password: "test123"
-          pihole-url: "http://127.0.0.1/api"
+          pihole-url: "http://pihole/api"
           pihole-config-file: "./test/pihole-config-example.yaml"
