@@ -156,9 +156,10 @@ async function applyLocalDnsSettings(piholeConfig) {
     return;
   }
 
-  /*try {
+  // Needed, since first /config request always fails
+  try {
     await axiosInstance.get(`${piholeUrl}/config`);
-  } catch (error) {}*/
+  } catch (error) {}
 
   await patchPiholeConfig(config);
 }
