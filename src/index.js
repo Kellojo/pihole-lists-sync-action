@@ -90,7 +90,6 @@ async function deleteExistingLists(lists) {
     };
   });
 
-  console.log(requestBody);
   const deleteResponse = await axiosInstance.post(
     `${piholeUrl}/lists:batchDelete`,
     requestBody
@@ -123,8 +122,8 @@ async function applyLocalDnsSettings(piholeConfig) {
   core.info("🔄 Updating local DNS records");
   const config = {
     dns: {
-      hosts: [],
-      cnames: [],
+      hosts: null,
+      cnames: null,
     },
   };
 
@@ -162,15 +161,15 @@ async function applyLocalDnsSettings(piholeConfig) {
     return;
   }
 
+  await patchPiholeConfig(config);
+}
+async function patchPiholeConfig(config) {
+  core.info(`Updating Pi-hole DNS configuration via API`);
   // Needed, since first /config request always fails
   try {
     await axiosInstance.get(`${piholeUrl}/config`);
   } catch (error) {}
 
-  await patchPiholeConfig(config);
-}
-async function patchPiholeConfig(config) {
-  core.info(`Updating Pi-hole DNS configuration via API`);
   const updateResponse = await axiosInstance.patch(`${piholeUrl}/config`, {
     config: config,
   });
