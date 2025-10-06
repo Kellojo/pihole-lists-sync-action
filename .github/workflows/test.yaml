@@ -38,4 +38,6 @@ jobs:
 
       - name: Stop Pi-hole container
         if: always()
-        run: docker compose down
+        run: |
+          cd test
+          docker compose down
