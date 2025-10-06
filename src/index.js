@@ -157,7 +157,6 @@ async function applyLocalDnsSettings(piholeConfig) {
     );
   }
 
-  console.log(config.dns);
   if (
     !config.dns.hasOwnProperty("hosts") &&
     !config.dns.hasOwnProperty("cnames")
