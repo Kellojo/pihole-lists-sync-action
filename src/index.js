@@ -209,9 +209,15 @@ async function updateGravity() {
 
 async function authenticateWithPihole() {
   core.info(`🔑 Authenticating with Pi-hole`);
+  try {
   const authResponse = await axiosInstance.post(`${piholeUrl}/auth`, {
     password: piholePassword,
   });
+  } catch (error) {
+    core.error("Error occurred:", error.message);
+    console.log(error);
+  }
+
   if (authResponse.status !== 200) {
     throw new Error(
       `Authentication failed with status: ${authResponse.status} - ${authResponse.statusText}`
