@@ -54075,6 +54075,7 @@ function requireSrc () {
 	  const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
 	  console.log(dnsResponse.data);
 	  if (dnsResponse.status !== 200) {
+	    console.log(dnsResponse);
 	    throw new Error(
 	      `Failed to fetch DNS configuration with status: ${dnsResponse.status} - ${dnsResponse.statusText}`
 	    );
