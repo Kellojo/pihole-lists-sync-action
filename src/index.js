@@ -1,8 +1,11 @@
 const core = require("@actions/core");
 const axios = require("axios");
+const axiosRetry = require("axios-retry");
 const https = require("https");
 const fs = require("fs");
 const yaml = require("yaml");
+
+axiosRetry(axios, { retries: 3 });
 
 core.info("Starting Pi-hole config sync...");
 
@@ -159,13 +162,6 @@ async function applyLocalDnsSettings(piholeConfig) {
 async function getDnsConfig() {
   core.info("Getting existing config from Pi-hole");
   console.log(`${piholeUrl}/config/dns`);
-
-  try {
-    await axiosInstance.get(`${piholeUrl}/config/dns`);
-  } catch (error) {
-    core.error(`Failed to fetch DNS configuration: ${error.message}`);
-    console.error(error);
-  }
 
   const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
   if (dnsResponse.status !== 200) {
