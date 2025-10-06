@@ -222,7 +222,7 @@ async function authenticateWithPihole() {
 async function logoutFromPihole() {
   core.info("");
   try {
-    core.info(`🔒 Logging out from Pi-hole`);
+    core.info(`👋 Logging out from Pi-hole`);
     await axiosInstance.delete(`${piholeUrl}/auth`);
     core.info(`Successfully logged out from Pi-hole`);
   } catch (error) {
