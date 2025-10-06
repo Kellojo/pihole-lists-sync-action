@@ -16,7 +16,7 @@ const allowSelfSigned = core.getInput("allow-self-signed-certs") === "true";
 core.info(`🌐 Pi-hole URL: ${piholeUrl}`);
 core.info(`📁 Pi-hole Config File: ${configFile}`);
 core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
-core.info("");
+console.log("");
 
 const axiosInstance = axios.create({
   httpsAgent: new https.Agent({
@@ -68,7 +68,7 @@ async function fetchListsFromPihole() {
 
   const { lists } = await blocklistResponse.data;
   core.info(`Found ${lists.length} lists configured in Pi-hole`);
-  core.info("");
+  console.log("");
 
   return lists;
 }
@@ -96,7 +96,7 @@ async function deleteExistingLists(lists) {
   }
 
   core.info(`All existing lists removed`);
-  core.info("");
+  console.log("");
 }
 async function addBlocklists(blocklistUrls) {
   core.info(`💾 Adding ${blocklistUrls.length} blocklists to Pi-hole`);
@@ -108,7 +108,7 @@ async function addBlocklists(blocklistUrls) {
     });
   }
   core.info(`All blocklists added`);
-  core.info("");
+  console.log("");
 }
 
 async function applyLocalDnsSettings(piholeConfig) {
@@ -165,7 +165,7 @@ async function getDnsConfig() {
     );
   }
   core.info(`DNS configuration fetched successfully`);
-  core.info("");
+  console.log("");
 
   return dnsResponse.data.config.dns;
 }
@@ -182,7 +182,7 @@ async function updateDnsConfig(dnsConfig) {
     );
   }
   core.info(`✅ DNS configuration updated successfully`);
-  core.info("");
+  console.log("");
 }
 
 async function updateGravity() {
@@ -197,7 +197,7 @@ async function updateGravity() {
   }
 
   core.info(`Gravity database updated successfully`);
-  core.info("");
+  console.log("");
 }
 
 async function authenticateWithPihole() {
@@ -217,10 +217,10 @@ async function authenticateWithPihole() {
   axiosInstance.defaults.headers.common["sid"] = sid;
 
   core.info(`Authentication successful, valid for ${session.validity} seconds`);
-  core.info("");
+  console.log("");
 }
 async function logoutFromPihole() {
-  core.info("");
+  console.log("");
   try {
     core.info(`👋 Logging out from Pi-hole`);
     await axiosInstance.delete(`${piholeUrl}/auth`);

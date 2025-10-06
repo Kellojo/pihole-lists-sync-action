@@ -53929,7 +53929,7 @@ function requireSrc () {
 	core.info(`🌐 Pi-hole URL: ${piholeUrl}`);
 	core.info(`📁 Pi-hole Config File: ${configFile}`);
 	core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
-	core.info("");
+	console.log("");
 
 	const axiosInstance = axios.create({
 	  httpsAgent: new https.Agent({
@@ -53981,7 +53981,7 @@ function requireSrc () {
 
 	  const { lists } = await blocklistResponse.data;
 	  core.info(`Found ${lists.length} lists configured in Pi-hole`);
-	  core.info("");
+	  console.log("");
 
 	  return lists;
 	}
@@ -54009,7 +54009,7 @@ function requireSrc () {
 	  }
 
 	  core.info(`All existing lists removed`);
-	  core.info("");
+	  console.log("");
 	}
 	async function addBlocklists(blocklistUrls) {
 	  core.info(`💾 Adding ${blocklistUrls.length} blocklists to Pi-hole`);
@@ -54021,7 +54021,7 @@ function requireSrc () {
 	    });
 	  }
 	  core.info(`All blocklists added`);
-	  core.info("");
+	  console.log("");
 	}
 
 	async function applyLocalDnsSettings(piholeConfig) {
@@ -54078,7 +54078,7 @@ function requireSrc () {
 	    );
 	  }
 	  core.info(`DNS configuration fetched successfully`);
-	  core.info("");
+	  console.log("");
 
 	  return dnsResponse.data.config.dns;
 	}
@@ -54095,7 +54095,7 @@ function requireSrc () {
 	    );
 	  }
 	  core.info(`✅ DNS configuration updated successfully`);
-	  core.info("");
+	  console.log("");
 	}
 
 	async function updateGravity() {
@@ -54110,7 +54110,7 @@ function requireSrc () {
 	  }
 
 	  core.info(`Gravity database updated successfully`);
-	  core.info("");
+	  console.log("");
 	}
 
 	async function authenticateWithPihole() {
@@ -54130,10 +54130,10 @@ function requireSrc () {
 	  axiosInstance.defaults.headers.common["sid"] = sid;
 
 	  core.info(`Authentication successful, valid for ${session.validity} seconds`);
-	  core.info("");
+	  console.log("");
 	}
 	async function logoutFromPihole() {
-	  core.info("");
+	  console.log("");
 	  try {
 	    core.info(`👋 Logging out from Pi-hole`);
 	    await axiosInstance.delete(`${piholeUrl}/auth`);
