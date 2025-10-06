@@ -45,7 +45,7 @@ async function run() {
 async function applyLists(piholeConfig) {
   if (!piholeConfig.blocklists || !Array.isArray(piholeConfig.blocklists)) {
     core.info(
-      "⏭️ Skipping blocklist sync as no blocklists are defined in the config file.",
+      "⏭️ Skipping blocklist sync as no blocklists are defined in the config file."
     );
     return;
   }
@@ -66,7 +66,7 @@ async function fetchListsFromPihole() {
 
   if (blocklistResponse.status !== 200) {
     throw new Error(
-      `Failed to fetch lists with status: ${blocklistResponse.status} - ${blocklistResponse.statusText}`,
+      `Failed to fetch lists with status: ${blocklistResponse.status} - ${blocklistResponse.statusText}`
     );
   }
 
@@ -89,13 +89,13 @@ async function deleteExistingLists(lists) {
 
   const deleteResponse = await axiosInstance.post(
     `${piholeUrl}/lists:batchDelete`,
-    requestBody,
+    requestBody
   );
   if (![200, 204].includes(deleteResponse.status)) {
     core.error(`Failed to delete existing lists`);
 
     throw new Error(
-      `Failed to delete lists with status: ${deleteResponse.status} - ${deleteResponse.statusText}`,
+      `Failed to delete lists with status: ${deleteResponse.status} - ${deleteResponse.statusText}`
     );
   }
 
@@ -133,7 +133,7 @@ async function applyLocalDnsSettings(piholeConfig) {
     });
   } else {
     core.info(
-      "⏭️ Skipping local DNS record sync as no localDnsRecords are defined in the config file.",
+      "⏭️ Skipping local DNS record sync as no localDnsRecords are defined in the config file."
     );
   }
 
@@ -147,13 +147,13 @@ async function applyLocalDnsSettings(piholeConfig) {
     });
   } else {
     core.info(
-      "⏭️ Skipping local DNS CNAME sync as no localDnsCnames are defined in the config file.",
+      "⏭️ Skipping local DNS CNAME sync as no localDnsCnames are defined in the config file."
     );
   }
 
   if (!config.dns.hosts && !config.dns.cnames.length) {
     core.info(
-      "⏭️ Skipping local DNS sync as no localDnsRecords or localDnsCnames sections are defined in the config file.",
+      "⏭️ Skipping local DNS sync as no localDnsRecords or localDnsCnames sections are defined in the config file."
     );
     return;
   }
@@ -172,7 +172,7 @@ async function patchPiholeConfig(config) {
   });
   if (updateResponse.status !== 200) {
     throw new Error(
-      `Failed to update Pi-hole config with status: ${updateResponse.status} - ${updateResponse.statusText}`,
+      `Failed to update Pi-hole config with status: ${updateResponse.status} - ${updateResponse.statusText}`
     );
   }
   core.info(`✅ DNS configuration updated successfully`);
@@ -182,11 +182,11 @@ async function patchPiholeConfig(config) {
 async function updateGravity() {
   core.info(`🔄 Updating Pi-hole gravity`);
   const gravityResponse = await axiosInstance.post(
-    `${piholeUrl}/action/gravity`,
+    `${piholeUrl}/action/gravity`
   );
   if (gravityResponse.status !== 200) {
     throw new Error(
-      `Failed to update gravity with status: ${gravityResponse.status} - ${gravityResponse.statusText}`,
+      `Failed to update gravity with status: ${gravityResponse.status} - ${gravityResponse.statusText}`
     );
   }
 
@@ -202,7 +202,7 @@ async function authenticateWithPihole() {
 
   if (authResponse.status !== 200) {
     throw new Error(
-      `Authentication failed with status: ${authResponse.status} - ${authResponse.statusText}`,
+      `Authentication failed with status: ${authResponse.status} - ${authResponse.statusText}`
     );
   }
   const { session } = authResponse.data;
@@ -237,7 +237,7 @@ async function getPiholeConfig() {
   const config = yaml.parse(content);
   console.log("");
 
-  return config;
+  return config || {};
 }
 
 run();
