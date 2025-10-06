@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\"",
+    "test-act": "act push",
     "build": "rollup --config rollup.config.js"
   },
   "repository": {

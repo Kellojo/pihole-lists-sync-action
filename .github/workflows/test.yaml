@@ -17,7 +17,7 @@ jobs:
       - name: Start Pi-hole container
         run: |
           cd test
-          docker-compose up -d
+          docker compose up -d
 
       - name: Wait for Pi-hole to be ready
         run: |
@@ -38,4 +38,4 @@ jobs:
 
       - name: Stop Pi-hole container
         if: always()
-        run: docker-compose down
+        run: docker compose down
