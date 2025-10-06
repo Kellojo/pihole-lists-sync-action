@@ -54366,6 +54366,10 @@ function requireSrc () {
 	    return;
 	  }
 
+	  try {
+	    await axiosInstance.get(`${piholeUrl}/config`);
+	  } catch (error) {}
+
 	  await patchPiholeConfig(config);
 	}
 	async function patchPiholeConfig(config) {
