@@ -161,15 +161,14 @@ async function applyLocalDnsSettings(piholeConfig) {
 }
 async function getDnsConfig() {
   core.info("Getting existing config from Pi-hole");
-  console.log(`${piholeUrl}/config/dns`);
 
+  // Pi-hole API quirk: First request often fails, so we ignore any errors here
   try {
     await axiosInstance.get(`${piholeUrl}/config/dns`);
   } catch (error) {}
 
   const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
   if (dnsResponse.status !== 200) {
-    console.log(dnsResponse);
     throw new Error(
       `Failed to fetch DNS configuration with status: ${dnsResponse.status} - ${dnsResponse.statusText}`
     );
