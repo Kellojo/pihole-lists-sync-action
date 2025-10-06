@@ -27,9 +27,37 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Run tests
+      - name: Run full test
         uses: ./
         with:
           pihole-app-password: "test123"
           pihole-url: "http://pihole/api"
           pihole-config-file: "./test/pihole-config-example.yaml"
+
+      - name: Run only blocklist test
+        uses: ./
+        with:
+          pihole-app-password: "test123"
+          pihole-url: "http://pihole/api"
+          pihole-config-file: "./test/pihole-config-blocklist.yaml"
+
+      - name: Run only DNS entries test
+        uses: ./
+        with:
+          pihole-app-password: "test123"
+          pihole-url: "http://pihole/api"
+          pihole-config-file: "./test/pihole-config-dns.yaml"
+
+      - name: Run only cnames test
+        uses: ./
+        with:
+          pihole-app-password: "test123"
+          pihole-url: "http://pihole/api"
+          pihole-config-file: "./test/pihole-config-cnames.yaml"
+
+      - name: Run empty test
+        uses: ./
+        with:
+          pihole-app-password: "test123"
+          pihole-url: "http://pihole/api"
+          pihole-config-file: "./test/pihole-config-empty.yaml"

@@ -54338,6 +54338,7 @@ function requireSrc () {
 	  if (localDnsRecords && Array.isArray(localDnsRecords)) {
 	    core.info(`💾 Adding local DNS records`);
 	    config.dns.hosts = localDnsRecords.map((record) => {
+	      core.info(`Adding ${record.domain} -> ${record.ip}`);
 	      return `${record.ip.trim()} ${record.domain.trim()}`;
 	    });
 	  } else {
@@ -54351,6 +54352,7 @@ function requireSrc () {
 	    core.info(`💾 Adding local DNS CNAME records`);
 
 	    config.dns.cnames = localDnsCnameRecords.map((record) => {
+	      core.info(`Adding ${record.domain} -> ${record.target}`);
 	      return `${record.domain.trim()},${record.target.trim()}`;
 	    });
 	  } else {
