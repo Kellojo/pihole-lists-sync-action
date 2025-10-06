@@ -14,6 +14,9 @@ jobs:
     services:
       pihole:
         image: pihole/pihole:latest
+        ports:
+          - 80:80
+          - 443:443
         env:
           TZ: Europe/Berlin
           FTLCONF_webserver_api_password: test123
@@ -21,9 +24,6 @@ jobs:
           --health-interval 4s
           --health-timeout 2s
           --health-retries 25
-        ports:
-          - "80:80"
-          - "443:443"
 
     steps:
       - name: Checkout repository
