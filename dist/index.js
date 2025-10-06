@@ -54229,7 +54229,7 @@ function requireSrc () {
 	core.info(`🌐 Pi-hole URL: ${piholeUrl}`);
 	core.info(`📁 Pi-hole Config File: ${configFile}`);
 	core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
-	console.log("");
+	core.info("");
 
 	const axiosInstance = axios.create({
 	  httpsAgent: new https.Agent({
@@ -54268,7 +54268,7 @@ function requireSrc () {
 
 	  await updateGravity();
 	  core.info("✅ Pi-hole blocklist sync completed successfully");
-	  console.log("");
+	  core.info("");
 	}
 	async function fetchListsFromPihole() {
 	  core.info(`🛜 Fetching lists via API`);
@@ -54282,7 +54282,7 @@ function requireSrc () {
 
 	  const { lists } = await blocklistResponse.data;
 	  core.info(`Found ${lists.length} lists configured in Pi-hole`);
-	  console.log("");
+	  core.info("");
 
 	  return lists;
 	}
@@ -54310,7 +54310,7 @@ function requireSrc () {
 	  }
 
 	  core.info(`All existing lists removed`);
-	  console.log("");
+	  core.info("");
 	}
 	async function addBlocklists(blocklistUrls) {
 	  core.info(`💾 Adding ${blocklistUrls.length} blocklists to Pi-hole`);
@@ -54322,7 +54322,7 @@ function requireSrc () {
 	    });
 	  }
 	  core.info(`All blocklists added`);
-	  console.log("");
+	  core.info("");
 	}
 
 	async function applyLocalDnsSettings(piholeConfig) {
@@ -54386,7 +54386,7 @@ function requireSrc () {
 	    );
 	  }
 	  core.info(`✅ DNS configuration updated successfully`);
-	  console.log("");
+	  core.info("");
 	}
 
 	async function updateGravity() {
@@ -54401,7 +54401,7 @@ function requireSrc () {
 	  }
 
 	  core.info(`Gravity database updated successfully`);
-	  console.log("");
+	  core.info("");
 	}
 
 	async function authenticateWithPihole() {
@@ -54422,10 +54422,10 @@ function requireSrc () {
 	  axiosInstance.defaults.headers.common["sid"] = sid;
 
 	  core.info(`Authentication successful, valid for ${session.validity} seconds`);
-	  console.log("");
+	  core.info("");
 	}
 	async function logoutFromPihole() {
-	  console.log("");
+	  core.info("");
 	  try {
 	    core.info(`👋 Logging out from Pi-hole`);
 	    await axiosInstance.delete(`${piholeUrl}/auth`);
@@ -54445,7 +54445,7 @@ function requireSrc () {
 	  core.info(`Pi-hole config file read successfully`);
 	  core.info(`Parsing config file`);
 	  const config = yaml.parse(content);
-	  console.log("");
+	  core.info("");
 
 	  return config || {};
 	}
