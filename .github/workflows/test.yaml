@@ -31,10 +31,11 @@ jobs:
           done
 
       - name: Run tests
-        run: |
-          echo "Running tests..."
-
-        # TODO: use local action for testing & check, if it needs to be built first
+        uses: ./
+        with:
+          pihole-app-password: "test123"
+          pihole-url: "http://localhost/api"
+          pihole-config-file: "./pihole-config.yaml"
 
       - name: Stop Pi-hole container
         if: always()
