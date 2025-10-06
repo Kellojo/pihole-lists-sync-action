@@ -54228,13 +54228,13 @@ function requireSrc () {
 	core.info(`🔓 Allow Self-Signed Certificates: ${allowSelfSigned}`);
 	core.info("");
 
-	let axiosInstance = axios.create({
+	const axiosInstance = axios.create({
 	  httpsAgent: new https.Agent({
 	    rejectUnauthorized: !allowSelfSigned,
 	  }),
 	  timeout: 30000,
 	});
-	axiosInstance = axiosRetry(axiosInstance, {
+	axiosRetry(axiosInstance, {
 	  retries: 3,
 	  onRetry: () => {
 	    core.info("Retrying request...");
