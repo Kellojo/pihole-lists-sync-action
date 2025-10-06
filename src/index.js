@@ -116,7 +116,7 @@ async function addBlocklists(blocklistUrls) {
 }
 
 async function applyLocalDnsSettings(piholeConfig) {
-  const localDnsRecords = piholeConfig.localDnsRecordsFile;
+  const localDnsRecords = piholeConfig.localDnsRecords;
   const bHasAnyLocalDnsRecords =
     localDnsRecords && Array.isArray(localDnsRecords);
 
