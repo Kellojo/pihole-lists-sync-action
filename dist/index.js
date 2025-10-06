@@ -54210,7 +54210,7 @@ function requireSrc () {
 	hasRequiredSrc = 1;
 	const core = requireCore();
 	const axios = /*@__PURE__*/ requireAxios();
-	const axiosRetry = requireCjs();
+	const axiosRetry = requireCjs().default;
 	const https = require$$3;
 	const fs = require$$1;
 	const yaml = require$$5;

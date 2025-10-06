@@ -1,6 +1,6 @@
 const core = require("@actions/core");
 const axios = require("axios");
-const axiosRetry = require("axios-retry");
+const axiosRetry = require("axios-retry").default;
 const https = require("https");
 const fs = require("fs");
 const yaml = require("yaml");
