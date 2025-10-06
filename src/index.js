@@ -5,7 +5,13 @@ const https = require("https");
 const fs = require("fs");
 const yaml = require("yaml");
 
-axiosRetry(axios, { retries: 3 });
+axiosRetry(axios, {
+  retries: 3,
+  retryCondition: () => true,
+  onRetry: () => {
+    console.log("Retrying request...");
+  },
+});
 
 core.info("Starting Pi-hole config sync...");
 
