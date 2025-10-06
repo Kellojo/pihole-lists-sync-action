@@ -35,7 +35,7 @@ jobs:
         with:
           pihole-app-password: "test123"
           pihole-url: "http://localhost/api"
-          pihole-config-file: "./pihole-config.yaml"
+          pihole-config-file: "./test/pihole-config.yaml"
 
       - name: Stop Pi-hole container
         if: always()
