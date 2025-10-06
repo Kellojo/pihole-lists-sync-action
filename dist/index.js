@@ -54072,18 +54072,22 @@ function requireSrc () {
 	async function getDnsConfig() {
 	  core.info("Getting existing config from Pi-hole");
 	  console.log(`${piholeUrl}/config/dns`);
-	  const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
-	  console.log(dnsResponse.data);
-	  if (dnsResponse.status !== 200) {
-	    console.log(dnsResponse);
-	    throw new Error(
-	      `Failed to fetch DNS configuration with status: ${dnsResponse.status} - ${dnsResponse.statusText}`
-	    );
+	  try {
+	    const dnsResponse = await axiosInstance.get(`${piholeUrl}/config/dns`);
+	    if (dnsResponse.status !== 200) {
+	      console.log(dnsResponse);
+	      throw new Error(
+	        `Failed to fetch DNS configuration with status: ${dnsResponse.status} - ${dnsResponse.statusText}`
+	      );
+	    }
+	    core.info(`DNS configuration fetched successfully`);
+	    console.log("");
+	    console.log(dnsResponse.data);
+	    return dnsResponse.data.config.dns;
+	  } catch (error) {
+	    core.error("Error occurred:", error.message);
+	    console.log(error);
 	  }
-	  core.info(`DNS configuration fetched successfully`);
-	  console.log("");
-
-	  return dnsResponse.data.config.dns;
 	}
 	async function updateDnsConfig(dnsConfig) {
 	  core.info(`📡 Updating Pi-hole DNS configuration`);
