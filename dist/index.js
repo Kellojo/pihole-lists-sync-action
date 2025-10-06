@@ -54370,7 +54370,7 @@ function requireSrc () {
 	}
 	async function patchPiholeConfig(config) {
 	  core.info(`Updating Pi-hole DNS configuration via API`);
-	  const updateResponse = await axiosInstance.post(
+	  const updateResponse = await axiosInstance.patch(
 	    `${piholeUrl}/config`,
 	    config
 	  );
