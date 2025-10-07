@@ -1,0 +1,4 @@
+---
+blocklists:
+  - https://www.my-list.com/list.txt
+  - https://www.my-other-list.com/list.txt

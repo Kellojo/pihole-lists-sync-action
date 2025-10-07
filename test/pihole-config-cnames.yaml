@@ -1,0 +1,6 @@
+---
+localDnsCnames:
+  - domain: alias.my.home
+    target: my.home
+  - domain: git.my.home
+    target: my.home

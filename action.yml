@@ -15,10 +15,10 @@ inputs:
     required: false
     default: false
 
-  blocklist-file:
-    description: "The file of blocklists to sync"
+  pihole-config-file:
+    description: "The file of Pi-hole configuration to sync"
     required: true
-    default: "blocklists.txt"
+    default: "pihole-config.yaml"
 
 runs:
   using: "node20"
