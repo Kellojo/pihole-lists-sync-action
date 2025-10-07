@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Sync Pi-hole blocklists
-        uses: kellojo/pihole-lists-sync-action@v1
+        uses: kellojo/pihole-lists-sync-action@v2
         with:
           pihole-url: "https://your-pihole.local/api"
           pihole-app-password: ${{ secrets.PIHOLE_PASSWORD }}
