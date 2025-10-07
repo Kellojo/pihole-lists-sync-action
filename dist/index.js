@@ -54382,6 +54382,7 @@ function requireSrc () {
 	}
 	async function patchPiholeConfig(config) {
 	  core.info(`Updating Pi-hole DNS configuration via API`);
+	  core.info("test");
 	  // Needed, since first /config request always fails
 	  try {
 	    await axiosInstance.get(`${piholeUrl}/config`);
