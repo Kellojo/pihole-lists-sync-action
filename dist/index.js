@@ -54387,21 +54387,22 @@ function requireSrc () {
 	    await axiosInstance.get(`${piholeUrl}/config`);
 	  } catch (error) {}
 
-	  const updateResponse = await axiosInstance.patch(`${piholeUrl}/config`, {
-	    config: config,
-	  });
-	  console.log(updateResponse.status);
-	  if (updateResponse.status !== 200) {
-	    if (updateResponse.status === 403) {
+	  try {
+	    const updateResponse = await axiosInstance.patch(`${piholeUrl}/config`, {
+	      config: config,
+	    });
+	  } catch (error) {
+	    console.log(error);
+	    if (error.response && error.response.status === 403) {
 	      throw new Error(
 	        `❌ Could not update Pi-hole config: Please set webserver.api.app_sudo to true in Pi-hole settings (System > Settings > All Settings).`
 	      );
 	    }
-
 	    throw new Error(
 	      `Failed to update Pi-hole config with status: ${updateResponse.status} - ${updateResponse.statusText}`
 	    );
 	  }
+
 	  core.info(`✅ DNS configuration updated successfully`);
 	  core.info("");
 	}
