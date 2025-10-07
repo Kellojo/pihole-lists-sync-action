@@ -27,6 +27,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Wait 1 second
+        run: sleep 1
       - name: Run full test
         uses: ./
         with:
@@ -34,6 +36,8 @@ jobs:
           pihole-url: "http://pihole/api"
           pihole-config-file: "./test/pihole-config-example.yaml"
 
+      - name: Wait 1 second
+        run: sleep 1
       - name: Run only blocklist test
         uses: ./
         with:
@@ -41,6 +45,8 @@ jobs:
           pihole-url: "http://pihole/api"
           pihole-config-file: "./test/pihole-config-blocklist.yaml"
 
+      - name: Wait 1 second
+        run: sleep 1
       - name: Run only DNS entries test
         uses: ./
         with:
@@ -48,6 +54,8 @@ jobs:
           pihole-url: "http://pihole/api"
           pihole-config-file: "./test/pihole-config-dns.yaml"
 
+      - name: Wait 1 second
+        run: sleep 1
       - name: Run only cnames test
         uses: ./
         with:
@@ -55,6 +63,8 @@ jobs:
           pihole-url: "http://pihole/api"
           pihole-config-file: "./test/pihole-config-cnames.yaml"
 
+      - name: Wait 1 second
+        run: sleep 1
       - name: Run empty test
         uses: ./
         with:
