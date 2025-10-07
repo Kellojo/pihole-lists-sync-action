@@ -180,6 +180,7 @@ async function patchPiholeConfig(config) {
   const updateResponse = await axiosInstance.patch(`${piholeUrl}/config`, {
     config: config,
   });
+  console.log(updateResponse.status);
   if (updateResponse.status !== 200) {
     if (updateResponse.status === 403) {
       throw new Error(
