@@ -54261,6 +54261,7 @@ function requireSrc () {
 	    core.info(
 	      "⏭️ Skipping blocklist sync as no blocklists are defined in the config file."
 	    );
+	    core.info("");
 	    return;
 	  }
 
