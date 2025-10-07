@@ -179,18 +179,17 @@ async function patchPiholeConfig(config) {
   } catch (error) {}
 
   try {
-    const updateResponse = await axiosInstance.patch(`${piholeUrl}/config`, {
+    await axiosInstance.patch(`${piholeUrl}/config`, {
       config: config,
     });
   } catch (error) {
-    console.log(error);
-    if (error.response && error.response.status === 403) {
+    if (error.status === 403) {
       throw new Error(
         `❌ Could not update Pi-hole config: Please set webserver.api.app_sudo to true in Pi-hole settings (System > Settings > All Settings).`
       );
     }
     throw new Error(
-      `Failed to update Pi-hole config with status: ${updateResponse.status} - ${updateResponse.statusText}`
+      `Failed to update Pi-hole config with status: ${error.status} - ${error.statusText}`
     );
   }
 
