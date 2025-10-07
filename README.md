@@ -59,7 +59,7 @@ jobs:
 
 ## 📁 Pi-hole Config File Format
 
-Create a `pihole-config.yaml` file in your repository with the following structure:
+Create a `pihole-config.yaml` file in your repository with the following structure (leave out sections as needed):
 
 ```yaml
 blocklists:
