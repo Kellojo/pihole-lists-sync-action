@@ -54395,7 +54395,7 @@ function requireSrc () {
 	  } catch (error) {
 	    if (error.status === 403) {
 	      throw new Error(
-	        `❌ Could not update Pi-hole config: Please set webserver.api.app_sudo to true in Pi-hole settings (System > Settings > All Settings).`
+	        `❌ Could not update Pi-hole config: Please set webserver.api.app_sudo to true in Pi-hole settings (System > Settings > All Settings > Webserver and API > webserver.api.app_sudo).`
 	      );
 	    }
 	    throw new Error(
