@@ -54341,7 +54341,7 @@ function requireSrc () {
 
 	  const localDnsRecords = piholeConfig.localDnsRecords;
 	  if (localDnsRecords && Array.isArray(localDnsRecords)) {
-	    core.info(`Adding local DNS records`);
+	    core.info(`💾 Adding local DNS records`);
 	    config.dns.hosts = localDnsRecords.map((record) => {
 	      core.info(`- ${record.domain} -> ${record.ip}`);
 	      return `${record.ip.trim()} ${record.domain.trim()}`;
@@ -54355,7 +54355,7 @@ function requireSrc () {
 
 	  const localDnsCnameRecords = piholeConfig.localDnsCnames;
 	  if (localDnsCnameRecords && Array.isArray(localDnsCnameRecords)) {
-	    core.info(`Adding local DNS CNAME records`);
+	    core.info(`💾 Adding local DNS CNAME records`);
 
 	    config.dns.cnames = localDnsCnameRecords.map((record) => {
 	      core.info(`- ${record.domain} -> ${record.target}`);
