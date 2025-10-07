@@ -110,7 +110,7 @@ async function deleteExistingLists(lists) {
 async function addBlocklists(blocklistUrls) {
   core.info(`💾 Adding ${blocklistUrls.length} blocklists to Pi-hole`);
   for (const url of blocklistUrls) {
-    core.info(`Adding ${url}`);
+    core.info(`- ${url}`);
     await axiosInstance.post(`${piholeUrl}/lists`, {
       address: url,
       type: "block",
@@ -131,9 +131,9 @@ async function applyLocalDnsSettings(piholeConfig) {
 
   const localDnsRecords = piholeConfig.localDnsRecords;
   if (localDnsRecords && Array.isArray(localDnsRecords)) {
-    core.info(`💾 Adding local DNS records`);
+    core.info(`Adding local DNS records`);
     config.dns.hosts = localDnsRecords.map((record) => {
-      core.info(`Adding ${record.domain} -> ${record.ip}`);
+      core.info(`- ${record.domain} -> ${record.ip}`);
       return `${record.ip.trim()} ${record.domain.trim()}`;
     });
   } else {
@@ -145,10 +145,10 @@ async function applyLocalDnsSettings(piholeConfig) {
 
   const localDnsCnameRecords = piholeConfig.localDnsCnames;
   if (localDnsCnameRecords && Array.isArray(localDnsCnameRecords)) {
-    core.info(`💾 Adding local DNS CNAME records`);
+    core.info(`Adding local DNS CNAME records`);
 
     config.dns.cnames = localDnsCnameRecords.map((record) => {
-      core.info(`Adding ${record.domain} -> ${record.target}`);
+      core.info(`- ${record.domain} -> ${record.target}`);
       return `${record.domain.trim()},${record.target.trim()}`;
     });
   } else {
