@@ -26,13 +26,7 @@ const axiosInstance = axios.create({
 });
 axiosRetry(axiosInstance, {
   retries: 3,
-  retryCondition: (error) => {
-    const status = error.status;
-    if (typeof status === "number") {
-      return ![401].includes(status);
-    }
-    return true;
-  },
+  retryCondition: () => true,
   onRetry: () => {
     core.info("Retrying failed API request...");
   },
