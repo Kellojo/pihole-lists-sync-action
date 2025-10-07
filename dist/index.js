@@ -54381,7 +54381,6 @@ function requireSrc () {
 	  await patchPiholeConfig(config);
 	}
 	async function patchPiholeConfig(config) {
-	  core.info("hello 123");
 	  core.info(`Updating Pi-hole DNS configuration via API`);
 	  // Needed, since first /config request always fails
 	  try {
