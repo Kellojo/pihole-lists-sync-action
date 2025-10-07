@@ -54335,7 +54335,7 @@ function requireSrc () {
 	  const config = {
 	    dns: {
 	      hosts: null,
-	      cnames: null,
+	      cnameRecords: null,
 	    },
 	  };
 
@@ -54357,12 +54357,12 @@ function requireSrc () {
 	  if (localDnsCnameRecords && Array.isArray(localDnsCnameRecords)) {
 	    core.info(`💾 Adding local DNS CNAME records`);
 
-	    config.dns.cnames = localDnsCnameRecords.map((record) => {
+	    config.dns.cnameRecords = localDnsCnameRecords.map((record) => {
 	      core.info(`- ${record.domain} -> ${record.target}`);
 	      return `${record.domain.trim()},${record.target.trim()}`;
 	    });
 	  } else {
-	    delete config.dns.cnames;
+	    delete config.dns.cnameRecords;
 	    core.info(
 	      "⏭️ Skipping local DNS CNAME sync as no localDnsCnames are defined in the config file."
 	    );
@@ -54370,7 +54370,7 @@ function requireSrc () {
 
 	  if (
 	    !config.dns.hasOwnProperty("hosts") &&
-	    !config.dns.hasOwnProperty("cnames")
+	    !config.dns.hasOwnProperty("cnameRecords")
 	  ) {
 	    core.info(
 	      "⏭️ Skipping local DNS sync as no localDnsRecords or localDnsCnames sections are defined in the config file."
