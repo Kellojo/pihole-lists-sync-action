@@ -116,7 +116,7 @@ async function addBlocklists(blocklistUrls) {
       address: url,
     });
 
-    if (response.status !== 200) {
+    if (response.status !== 201) {
       core.error(response.data);
       throw new Error(`Failed to add blocklist ${url}: ${response.data.error}`);
     }
