@@ -54327,9 +54327,8 @@ function requireSrc () {
 	    });
 
 	    if (response.status !== 200) {
-	      const errorMessage = `Failed to add blocklist ${url}: ${response.data.error?.message}`;
-	      core.error(errorMessage);
-	      throw new Error(errorMessage);
+	      core.error(response.data);
+	      throw new Error(`Failed to add blocklist ${url}: ${response.data.error}`);
 	    }
 	  }
 	  core.info(`All blocklists added`);
