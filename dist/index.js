@@ -54321,10 +54321,15 @@ function requireSrc () {
 	  core.info(`💾 Adding ${blocklistUrls.length} blocklists to Pi-hole`);
 	  for (const url of blocklistUrls) {
 	    core.info(`- ${url}`);
-	    await axiosInstance.post(`${piholeUrl}/lists`, {
+
+	    const response = await axiosInstance.post(`${piholeUrl}/lists?type=block`, {
 	      address: url,
-	      type: "block",
 	    });
+
+	    if (response.status !== 201) {
+	      core.error(response.data);
+	      throw new Error(`Failed to add blocklist ${url}: ${response.data.error}`);
+	    }
 	  }
 	  core.info(`All blocklists added`);
 	  core.info("");

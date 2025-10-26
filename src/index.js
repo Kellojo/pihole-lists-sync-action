@@ -112,17 +112,13 @@ async function addBlocklists(blocklistUrls) {
   for (const url of blocklistUrls) {
     core.info(`- ${url}`);
 
-    core.info(`  Adding blocklist...`);
     const response = await axiosInstance.post(`${piholeUrl}/lists?type=block`, {
       address: url,
     });
 
-    if (response.status !== 200) {
-      const errorMessage = `Failed to add blocklist ${url}: ${
-        response.data.error?.message || error.message
-      }`;
-      core.error(errorMessage);
-      throw new Error(errorMessage);
+    if (response.status !== 201) {
+      core.error(response.data);
+      throw new Error(`Failed to add blocklist ${url}: ${response.data.error}`);
     }
   }
   core.info(`All blocklists added`);
