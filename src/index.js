@@ -112,6 +112,7 @@ async function addBlocklists(blocklistUrls) {
   for (const url of blocklistUrls) {
     core.info(`- ${url}`);
 
+    core.info(`  Adding blocklist...`);
     const response = await axiosInstance.post(`${piholeUrl}/lists?type=block`, {
       address: url,
     });
