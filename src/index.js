@@ -114,6 +114,7 @@ async function addBlocklists(blocklistUrls) {
     await axiosInstance.post(`${piholeUrl}/lists?type=block`, {
       address: url,
       comment: "Managed via pihole-lists-sync GitHub Action",
+      groups: [],
     });
   }
   core.info(`All blocklists added`);
