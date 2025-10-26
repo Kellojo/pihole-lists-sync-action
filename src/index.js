@@ -41,6 +41,7 @@ async function run() {
   } catch (error) {
     core.error("Error occurred:", error.message);
     core.setFailed(`Action failed with error: ${error.message}`);
+    core.error(error);
   }
 
   logoutFromPihole();
